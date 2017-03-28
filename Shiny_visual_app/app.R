@@ -96,5 +96,5 @@ server <- function(input, output) {
 shinyApp(ui = ui, server = server)
 
 
-runApp('/home/piss/Documents/Shiny/appTest')
+# runApp('/home/piss/Documents/Shiny/appTest')   
 
