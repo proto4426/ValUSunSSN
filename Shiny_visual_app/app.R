@@ -37,6 +37,7 @@ library(ggplot2)
 library(ValUSunSSN)
 library(plotly)
 library(gridExtra)
+library(grid)
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
@@ -53,26 +54,29 @@ server <- function(input, output) {
     #bins <- seq(min(x), max(x), length.out = input$bins + 1)
     g <- ggplot(x) +
            geom_line(aes_string(x = "Date", y = input$stations)) +
-           ggtitle("hist") + theme_piss()
+            theme_piss()
     # print(ggplotly(g))
     # plot_ly(data = x, x = ~Date, y = ~input$stations, type = "scattergl") %>%
     #         #color = ~x, colors = c("green", "blue", "red")) 
     #   layout(xaxis = xl, yaxis = yl, title = tit, legend = l)
     g2 <- ggplot(x) +
       geom_line(aes_string(x = "Date", y = input$stations2)) +
-      ggtitle("hist") + theme_piss()
+      theme_piss()
 
     #### Plot Raw data (without filling)
     
     rownames(y) <- rownames(zssn) <- 1:nrow(y)
     y1 <- cbind(as.data.frame(data.mat2.fin), Date = data.mat$Date, x = "Raw")
     
-    gg <- ggplot(y1) + ggtitle("hist") + theme_piss() + 
+    gg <- ggplot(y1) +  theme_piss() + 
       geom_line(aes_string(x = "Date", y = input$stations), col = "red") 
-    gg2 <- ggplot(y1) + ggtitle("hist") + theme_piss() + 
+    gg2 <- ggplot(y1) +  theme_piss() + 
       geom_line(aes_string(x = "Date", y = input$stations2), col = "red") 
     
-    grid.arrange(g, gg, g2, gg2, ncol = 1, title = "Comparisons of")
+    grid.arrange(g, gg, g2, gg2, ncol = 1,
+                 top = textGrob(" Comparison of ns + solar cycle ")),
+                                                     gp = gpar(fontsize = 22, font = 3, 
+                                                     col ="red")))
   })
 
 }
@@ -80,5 +84,5 @@ server <- function(input, output) {
 shinyApp(ui = ui, server = server)
 
 
-# runApp('/home/piss/Documents/Shiny/appTest')   
+runApp('/home/piss/Documents/Shiny/appTest')
 
