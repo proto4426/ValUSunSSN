@@ -187,10 +187,17 @@
 #' generated as this thesis will use exclusive \code{ggplot2} for the plots.
 #' Values of other parameters such as colours could be changed inside the function.
 #' @examples
-#' # To generate the PP-plot ! See code for more details
-#' ggplot(data = data.frame(empirical,model_est), aes(x=empirical,y=model_est)) +
-#' geom_point(shape = 1, col = "#33666C") + geom_abline(intercept=0,slope=1,col="red") +
-#' theme_piss() +  ggtitle("Probability plot")
+#' df_uccle_vero <- data.frame(time = z1$Date[1:nrow(filledt.vero)], SSN_wnUC2 = filledt.vero$UC2, from = "Vero")
+#'
+#' df_uccle_c <- rbind.data.frame(df_uccle_vero, data.frame(time = z1$Date[1:nrow(df_uccle_vero)],
+#'                                                         SSN_wnUC2 = zssn[,"wnUC2"][1:nrow(df_uccle_vero)], from = "`interpolEM`"))
+#'
+#' ggplot(df_uccle_c, aes(col = from)) +
+#'   geom_point(aes(x = time, y = SSN_wnUC2), size = 0.15) +
+#'   solar.cycle() +
+#'   guides(colour = guide_legend(override.aes = list(size= 3))) +
+#'   ggtitle("Filled missing values") +
+#'   theme_piss()
 "theme_piss" <-
   function(size_p = 18, size_c = 14, size_l = 12, theme = theme_bw()){
     theme(plot.title = element_text(size = size_p, hjust=0.5,
