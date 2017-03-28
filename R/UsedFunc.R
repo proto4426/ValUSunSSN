@@ -81,12 +81,9 @@
 }
 
 
-#	y	embedded matrix					[n,m]
-#	nset	is # of data sets used to build y
-#	Td	embedding delay (integer)
-#	displ	set displ = F to prevent matrix size from being displayed
-#	x	averaged state vector				[n+(m-1)T,1]
 
+
+# ===============================================================
 #' @export deembedy
 #' @title deembeds m-dimensional space
 #' @description
@@ -168,3 +165,42 @@
 ## facilitated by randomized algorithms --> more efficient
 ## However, from now, profiling in the main function shows that its weight
 ## is  relatively minimal in the computational time compared
+
+
+# ===============================================================
+#' @export theme_piss
+#' @title Homogeneous theme for ggplots
+#' @author Antoine Pissoort, \email{antoine.pissoort@@student.uclouvain.be}
+#' @description
+#' Theme function for our builded \code{ggplots}.
+#' Useful get coherent and similar colours, themes,... for all plots.
+#' Also useful to decrease the number of lines of code.
+#'
+#' @param size_p Size of the plot's title.
+#' @param size_c Size of the axis' title.
+#' @param size_l Size of the legend's title.
+#' @param theme ggplot's theme for the plot.
+#'
+#' @return A personalized ggplot2 theme object to add to every builded plots.
+#' @details
+#' This function is useful to decrease the amount of code for each ggplots
+#' generated as this thesis will use exclusive \code{ggplot2} for the plots.
+#' Values of other parameters such as colours could be changed inside the function.
+#' @examples
+#' # To generate the PP-plot ! See code for more details
+#' ggplot(data = data.frame(empirical,model_est), aes(x=empirical,y=model_est)) +
+#' geom_point(shape = 1, col = "#33666C") + geom_abline(intercept=0,slope=1,col="red") +
+#' theme_piss() +  ggtitle("Probability plot")
+"theme_piss" <-
+  function(size_p = 18, size_c = 14, size_l = 12, theme = theme_bw()){
+    theme(plot.title = element_text(size = size_p, hjust=0.5,
+                                    colour = "#33666C", face="bold"),
+          axis.title = element_text(face = "bold", size= size_c,
+                                    colour = "#33666C"),
+          legend.position = c(.888, .152),
+          legend.title = element_text(colour="#33666C", size = size_l, face="bold"),
+          legend.background = element_rect(colour = "black"),
+          legend.key = element_rect(fill = "white")) +
+      guides(colour = guide_legend(override.aes = list(size = 2))) +
+      theme
+  }
