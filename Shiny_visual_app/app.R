@@ -7,8 +7,12 @@ colnames(z1) <- c( colnames(data.mat2.fin), "Date", "x")
 
 colnames(z1) <- gsub("-", "", colnames(z1))
 
+rownames(y) <- rownames(zssn) <- 1:nrow(y)
+y1 <- cbind(as.data.frame(data.mat2.fin), Date = data.mat$Date, x = "Raw")
+colnames(y1) <- colnames(z1)
 
-# Define UI for application that draws a histogram
+
+
 ui <- fluidPage(
   
   # Application title
@@ -18,16 +22,18 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       selectInput("stations",
-                  "Which Station ?",
+                  "Which Station ? (above)",
                   colnames(z1[,1:52])),
       selectInput("stations2",
-                  "Which Station ?",
-                  colnames(z1[,1:52]))
+                  "Which second Station ? (below)",
+                  colnames(z1[,1:52])), 
+      width = "150px"
     ),
+    checkboxInput("na", "Show missing values ?"),
     
     # Show a plot of the generated distribution
     mainPanel(
-      plotOutput("plot1", height = '800px')
+      plotOutput("plot1", height = '600px', width = "900px")
     )
   )
 )
@@ -54,29 +60,29 @@ server <- function(input, output) {
     #bins <- seq(min(x), max(x), length.out = input$bins + 1)
     g <- ggplot(x) +
            geom_line(aes_string(x = "Date", y = input$stations)) +
-            theme_piss()
+            theme_piss() + solar.cycle()
     # print(ggplotly(g))
     # plot_ly(data = x, x = ~Date, y = ~input$stations, type = "scattergl") %>%
     #         #color = ~x, colors = c("green", "blue", "red")) 
     #   layout(xaxis = xl, yaxis = yl, title = tit, legend = l)
-    g2 <- ggplot(x) +
+    g2 <- ggplot(x) + 
       geom_line(aes_string(x = "Date", y = input$stations2)) +
-      theme_piss()
+      theme_piss() + solar.cycle()
 
     #### Plot Raw data (without filling)
+    y <- y1 
+
+    gg <- ggplot(y) + 
+      geom_line(aes_string(x = "Date", y = input$stations), col = "red") +
+      theme_piss() + solar.cycle() 
+    gg2 <- ggplot(y) +  
+      geom_line(aes_string(x = "Date", y = input$stations2), col = "red") +
+      theme_piss() + solar.cycle() 
     
-    rownames(y) <- rownames(zssn) <- 1:nrow(y)
-    y1 <- cbind(as.data.frame(data.mat2.fin), Date = data.mat$Date, x = "Raw")
-    
-    gg <- ggplot(y1) +  theme_piss() + 
-      geom_line(aes_string(x = "Date", y = input$stations), col = "red") 
-    gg2 <- ggplot(y1) +  theme_piss() + 
-      geom_line(aes_string(x = "Date", y = input$stations2), col = "red") 
-    
-    grid.arrange(g, gg, g2, gg2, ncol = 1,
-                 top = textGrob(" Comparison of ns + solar cycle ")),
+    grid.arrange(g, gg, g2, gg2, ncol = 2,
+                 top = textGrob(expression(" Comparison of ns + solar cycle "),
                                                      gp = gpar(fontsize = 22, font = 3, 
-                                                     col ="red")))
+                                                     col ="#33666C")))
   })
 
 }
