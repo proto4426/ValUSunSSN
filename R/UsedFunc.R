@@ -211,3 +211,47 @@
       guides(colour = guide_legend(override.aes = list(size = 2))) +
       theme
   }
+
+
+
+
+# ===============================================================
+#' @export solar.cycle
+#' @title Solar cycles on ggplots
+#' @author Antoine Pissoort, \email{antoine.pissoort@@student.uclouvain.be}
+#' @description
+#' Funnction to plot vertical lines when added to ggplots corresponding to the solar cycles.
+#' Dates found for the solar Cycles comes from
+#'  \url{https://en.wikipedia.org/wiki/List_of_solar_cycles}
+#' @param col choose color for the vertical lines
+#' @param size choose size for the lines
+#' @return vertical lines plotted on ggplots showing the solar cycles
+#' @details
+#' This function is useful to decrease the amount of code for each ggplots
+#' generated as this thesis will use exclusive \code{ggplot2} for the plots.
+#' Values of other parameters such as colours could be changed inside the function.
+#' @examples
+#' df_uccle_vero <- data.frame(time = z1$Date[1:nrow(filledt.vero)], SSN_wnUC2 = filledt.vero$UC2, from = "Vero")
+#'
+#' df_uccle_c <- rbind.data.frame(df_uccle_vero, data.frame(time = z1$Date[1:nrow(df_uccle_vero)],
+#'                                                         SSN_wnUC2 = zssn[,"wnUC2"][1:nrow(df_uccle_vero)], from = "`interpolEM`"))
+#'
+#' ggplot(df_uccle_c, aes(col = from)) +
+#'   geom_point(aes(x = time, y = SSN_wnUC2), size = 0.15) +
+#'   solar.cycle() +
+#'   guides(colour = guide_legend(override.aes = list(size= 3))) +
+#'   ggtitle("Filled missing values") +
+#'   theme_piss()
+'solar.cycle' <- function( col = 2, size = 0.3) {
+  list(
+    geom_vline(xintercept = as.numeric(as.Date("1923-05-01")), col = col, size = size),
+    geom_vline(xintercept = as.numeric(as.Date("1933-11-01")), col = col, size = size),
+    geom_vline(xintercept = as.numeric(as.Date("1944-02-01")), col = col, size = size),
+    geom_vline(xintercept = as.numeric(as.Date("1954-02-01")), col = col, size = size),
+    geom_vline(xintercept = as.numeric(as.Date("1964-10-01")), col = col, size = size),
+    geom_vline(xintercept = as.numeric(as.Date("1976-05-01")), col = col, size = size),
+    geom_vline(xintercept = as.numeric(as.Date("1986-03-01")), col = col, size = size),
+    geom_vline(xintercept = as.numeric(as.Date("1996-06-01")), col = col, size = size),
+    geom_vline(xintercept = as.numeric(as.Date("2008-01-01")), col = col, size = size)
+  )
+}
