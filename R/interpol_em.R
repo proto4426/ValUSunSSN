@@ -1,27 +1,4 @@
 
-# The method decomposes the data into two time scales, which are processed
-# separately and then merged at the end. The cutoff time scale (nsmo) is
-# expressed in number of samples. A gaussian filter is used for filtering.
-# Monovariate data must be embedded first (nembed>1).
-# In the initial data set, gaps are supposed to be filled in with NA !!
-# Example for daily solar data with a cutoff at 81 days
-# yf = interpolsvd_em(y,3,81,0,20,1);
-#
-#   y       data.frame or matrix of data with gaps
-#   nembed  embedding dimension, must be > 1 for a monovariate data set
-#   nsmo    cutoff time scale scale (in nr of samples). Set nsmo=0 if only one
-#		single time scale is desired.
-#  threshold1 stops iterations after relative energy change is < threshold
-#   niter   max number of iterations
-#   ncomp   number of significant components, to be specified for running
-#           in automatic mode. Default (0) leads to manual selection
-#   displ   used to print some results during computaton
-#   method.smooth chooses you desired method function for smoothing and
-#   param.smooth if it is required by the method (set = nsmo if gaussian)
-# yf      same data set as y, but with gaps filled
-# Ak      weight distrtibution of the SVD
-
-
 # ===============================================================
 #' @export interpolsvd_em
 #' @title interpolated SVD EM algorithm to fill missing values
@@ -43,6 +20,12 @@
 #' Default (0=) leads to manual selection during the algorithm
 #' @param  displ boolean controlling the display of some information in
 #' the console during the algorithm
+#' @details
+#'  The method decomposes the data into two time scales, which are processed
+#' separately and then merged at the end. The cutoff time scale (nsmo) is
+#' expressed in number of samples. A gaussian filter is used for filtering.
+#' Monovariate data must be embedded first (nembed>1).
+#' In the initial data set, gaps are supposed to be filled in with NA !!
 #' @return A list with the following elements:
 #' \describe{
 #'   \item{\code{y.filled}}{The same dataset as y but with gaps filled}
