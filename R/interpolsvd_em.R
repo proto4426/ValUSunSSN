@@ -161,11 +161,13 @@
     }
     
     print(paste('using ',ncomp2,' components out of ',nE))
-  } else {
+  }
+  else {
     ncomp2 <- ncomp
     svd <- svd(xnew)
     S <- svd$d  ;   U <- svd$u  ;   V <- svd$v  ;   Ak <- diag(S)
   }
+  
   print("main loop starts")
   if (nsmo > 1){
     for (k in 2:ncomp2){  # Now consider the other modes of the SVD until ncomp.
@@ -198,7 +200,8 @@
       }
       if (displ == T ) cat('\n')
     }
-  }else{
+  }
+  else {
     for (k in 1:ncomp2){      iter.count <- 0
       while (iter.count < niter  ){
        xhp <- xnew  ;   xhp <- rank_reduce(xhp, k)
