@@ -15,7 +15,7 @@ solar.cycle(col = 2, size = 0.3)
 vertical lines plotted on ggplots showing the solar cycles
 }
 \description{
-Funnction to plot vertical lines when added to ggplots corresponding to the solar cycles.
+Function to plot vertical lines for adding to ggplots, which correspond to the solar cycles.
 Dates found for the solar Cycles comes from
  \url{https://en.wikipedia.org/wiki/List_of_solar_cycles}
 }

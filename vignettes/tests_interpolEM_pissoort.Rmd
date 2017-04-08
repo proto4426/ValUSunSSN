@@ -56,12 +56,10 @@ library(pander)
     geom_vline(xintercept = as.numeric(as.Date("2008-01-01")), col = col, size = 0.3)
    )
 }
-
-setwd("/home/piss/Documents/Consu LSTAT2390 /Q2/data/matlab/MatlabR2016")
 #source('smooth.gaussR_LOAD.R')  # Re-created Gaussian smoother
-source('interpol_em_pissoort.R')  # Put these in your directory
-#load('DataSSN.RData')   # Take full dataset
-load('DataSSN.RData')  # Take data since 1981
+library(ValUSunSSN)
+load('/home/piss/PissoortRepo/ValUSunSSN/Data/DataSSN.RData')   # Take full dataset
+#load('DataSSN81.RData')  # Take data since 1981
 # data.chris <- read.csv("Alldata.csv")
 # 
 # data.chris$Date <- as.Date(paste(data.chris$year,
@@ -363,8 +361,8 @@ options(mc.cores=parallel::detectCores()) # all available cores
 z <- interpolsvd_em(y, nembed = 2, nsmo = 81, ncomp = 4,
                       niter = 30, displ = F)
 # 193 sec for the whole dataset (with some stations discarded)
-
 z <- z$y.filled
+
 
 zssn <- interpolsvd_em(data.mat2.fin, nembed = 2, nsmo = 81, ncomp = 4,
                         niter = 30, displ = F)
@@ -529,7 +527,7 @@ Could'nt we
 
 ## Comparisons with other filling methods
 
-## Filling method of "Vero", time series starting from 1981
+### Filling method of "Vero", time series starting from 1981
 
 **1. Are the non-missing values still the same ?**
 
@@ -537,9 +535,9 @@ We hope so, but we will check it.
 
 
 ```{r}
-filledt.vero <- read.csv("time_SSNf_1981.csv")
+filledt.vero <- read.csv("/home/piss/PissoortRepo/ValUSunSSN/Data/time_SSNf_1981.csv")
 
-load("DataSSN81.RData") # Load data we have build
+load('/home/piss/PissoortRepo/ValUSunSSN/Data/DataSSN81.RData')
 
 colnames(zssn) <- colnames(z1[, -ncol(z1)])
 zssn <- cbind.data.frame(zssn, times = z1$Date)
@@ -550,7 +548,8 @@ colnames(missings) <- paste0("miss_", colnames(missings))
 zssn_complete <- cbind.data.frame(zssn, missings)
 sum(zssn_complete$miss_wnUC2)
 
-head(dif <- zssn_complete$wnUC2[!zssn_complete$miss_wnUC2] - data.mat2.fin$wnUC2[!zssn_complete$miss_wnUC2] )
+head(dif <- zssn_complete$wnUC2[!zssn_complete$miss_wnUC2] -
+       data.mat2.fin$wnUC2[!zssn_complete$miss_wnUC2] )
 sum (dif) / 0.0024342
 
 ```
@@ -694,6 +693,27 @@ ggplot(resdf_chris, aes(col = res)) + geom_line(aes(x = time, y = res), size = 0
 Discrepancies are less than with Vero’s method…
 
 We could want want to pick all the time or station that have big discrepancies. This could be informative
+
+
+
+
+
+
+```{r}
+library(softImpute)
+vignette(package = "softImpute")
+
+data.mat2 <- apply(data.mat2, 2, as.numeric)
+
+fit <- softImpute(data.mat2, trace = T, rank.max = 20, lambda = 2, type = "svd")
+fit <- softImpute(data.mat2, trace = T, rank.max = 20, lambda = 2, type = "als")
+
+data.mat2.fil1 <- softImpute::complete(data.mat2, fit)
+
+
+xs=as(data.mat2,"Incomplete")
+xsc <- biScale(data.mat2, col.scale=FALSE,row.scale=FALSE)
+```
 
 
 
