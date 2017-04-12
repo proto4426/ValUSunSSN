@@ -2,7 +2,7 @@ library(shiny)
 
 #options(shiny.error = browser)
 
-load('/home/piss/PissoortRepo/ValUSunSSN/Data/DataSSN.RData')
+load('/home/piss/PissoortRepo/ValUSunSSN/data/Filled/DataSSN.RData')
 #x <- data.mat2[, "wnUC2"]
 z1 <- cbind(as.data.frame(zssn), Date = data.mat$Date, x = "Filled")
 colnames(z1) <- c( colnames(data.mat2.fin), "Date", "x")

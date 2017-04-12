@@ -4,6 +4,7 @@ library(plotly)
 library(gridExtra)
 library(grid)
 #options(shiny.error = browser)
+load('/home/piss/PissoortRepo/ValUSunSSN/data/Filled/DataSSN.RData')
 
 
 z1 <- cbind(as.data.frame(zssn), Date = data.mat$Date, x = "Filled")
