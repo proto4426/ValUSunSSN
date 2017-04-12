@@ -1,7 +1,17 @@
 # How to Use
 
-This is an example application for Shiny.
-There are many ways to download and run it:
+## The easiest way (recommended)
+
+After you have installed and loaded the package, simply run the command
+```{r}
+ValUSunSSN::runExample()
+```
+
+and the application will appear in Rstudio.
+
+## Or you can also...
+
+Many ways to download and run it:
   ```R
 library(shiny)
 
