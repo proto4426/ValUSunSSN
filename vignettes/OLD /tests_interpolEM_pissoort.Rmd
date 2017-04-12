@@ -58,7 +58,7 @@ library(pander)
 }
 #source('smooth.gaussR_LOAD.R')  # Re-created Gaussian smoother
 library(ValUSunSSN)
-load('/home/piss/PissoortRepo/ValUSunSSN/Data/DataSSN.RData')   # Take full dataset
+#load('/home/piss/PissoortRepo/ValUSunSSN/Data/DataSSN.RData')   # Take full dataset
 #load('DataSSN81.RData')  # Take data since 1981
 # data.chris <- read.csv("Alldata.csv")
 # 
@@ -355,7 +355,6 @@ data.mat2.fin <- data.mat2[, !is_less5_cov] # 7 stations are discarded !!
 # Take this for input, as advised in the test.m file 
 y <- sqrt(data.mat2.fin+1) # Select randomly here, for testing
 
-
 options(mc.cores=parallel::detectCores()) # all available cores
 
 z <- interpolsvd_em(y, nembed = 2, nsmo = 81, ncomp = 4,
@@ -373,10 +372,10 @@ zssn <- zssn$y.filled
 
 
 ```{r, eval=T}
-rownames(y) <- rownames(zssn) <- 1:nrow(y)
+rownames(y) <- rownames(zssn) <- 1:nrow(zssn)
 y1 <- cbind(as.data.frame(data.mat2.fin), Date = data.mat$Date, x = "Raw")
 
-z1 <- cbind(as.data.frame(zssn), Date = data.mat$Date, x = "Filled")
+z1 <- cbind(as.data.frame(zssn), Date = data.mat$Date[data.mat$decdate>1981], x = "Filled")
 colnames(y1) <- colnames(z1) <- c(colnames(data.mat2.fin), "Date", "x")
 
 zz <- rbind(y1,z1)
@@ -535,15 +534,20 @@ We hope so, but we will check it.
 
 
 ```{r}
-filledt.vero <- read.csv("/home/piss/PissoortRepo/ValUSunSSN/Data/time_SSNf_1981.csv")
+filledt.vero <- read.csv("/home/piss/PissoortRepo/ValUSunSSN/data/time_SSNf_1981.csv")
 
-load('/home/piss/PissoortRepo/ValUSunSSN/Data/DataSSN81.RData')
+# By looking at the Julian dates at the top and the bottom of the series, we retrieved the dates.
+filledt.vero$Date <- seq(as.Date("1981-02-19"), as.Date("2015-03-30"), by = 1)
 
-colnames(zssn) <- colnames(z1[, -ncol(z1)])
+#load('/home/piss/PissoortRepo/ValUSunSSN/Data/DataSSN81.RData')
+
+colnames(zssn) <- colnames(z1[, -((ncol(z1)-1):(ncol(z1)))])
 zssn <- cbind.data.frame(zssn, times = z1$Date)
 
+zssn <- zssn[as.Date(zssn$times) %in% filledt.vero$Date,]
+
 ## add indicators for missingness
-missings <- is.na(y)
+missings <- is.na()
 colnames(missings) <- paste0("miss_", colnames(missings))
 zssn_complete <- cbind.data.frame(zssn, missings)
 sum(zssn_complete$miss_wnUC2)
@@ -568,10 +572,9 @@ The difference actually the same for all the observations. this not really an in
 # plot_ly(data = df_uccle_v, x = ~time, y = ~`wnUC2`, type = "scattergl", color = ~from, colors = c("green", "blue")) %>% layout(xaxis = xl, yaxis = yl, title = tit, legend = l)
 
 
-df_uccle_vero <- data.frame(time = z1$Date[1:nrow(filledt.vero)], SSN_wnUC2 = filledt.vero$UC2, from = "Vero")
+df_uccle_vero <- data.frame(time = zssn$times, SSN_wnUC2 = filledt.vero$UC2, from = "Vero")
 
-df_uccle_c <- rbind.data.frame(df_uccle_vero, data.frame(time = z1$Date[1:nrow(df_uccle_vero)],
-                                                         SSN_wnUC2 = zssn[,"wnUC2"][1:nrow(df_uccle_vero)], from = "`interpolEM`"))
+df_uccle_c <- rbind.data.frame(df_uccle_vero, data.frame(time = zssn$times, SSN_wnUC2 = zssn[,"wnUC2"], from = "`interpolEM`"))
 
 ggplot(df_uccle_c, aes(col = from)) + geom_point(aes(x = time, y = SSN_wnUC2), size = 0.15) + 
   solar.cycle() + theme_piss() +  guides(colour = guide_legend(override.aes = list(size= 3))) + ggtitle("Filled missing values")
@@ -582,8 +585,8 @@ ggplot(df_uccle_c, aes(col = from)) + geom_point(aes(x = time, y = SSN_wnUC2), s
 
 
 ```{r}
-resdf_vero <- data.frame(time = z1$Date[1:nrow(filledt.vero)],
-                         res = (filledt.vero$UC2) - (zssn[,"wnUC2"][1:nrow(df_uccle_vero)]) ) 
+resdf_vero <- data.frame(time = zssn$times,
+                         res = (filledt.vero$UC2) - (zssn[,"wnUC2"]) ) 
 max(resdf_vero$res)  ; min(resdf_vero$res)
 
 library(RColorBrewer)
@@ -599,9 +602,9 @@ Or we could also visualize the discrepancies between the filled values
 **Only for the filled data**
 
 ```{r}
-filled_ssn <- zssn[,"wnUC2"][1:nrow(df_uccle_vero)][zssn_complete$miss_wnUC2]
+filled_ssn <- zssn[,"wnUC2"][zssn_complete$miss_wnUC2]
 
-resdf_vero <- data.frame(time = z1$Date[1:nrow(filledt.vero)][zssn_complete$miss_wnUC2],
+resdf_vero <- data.frame(time = zssn$times[zssn_complete$miss_wnUC2],
                          res = (filledt.vero$UC2[zssn_complete$miss_wnUC2]) - filled_ssn ) 
 max(resdf_vero$res)  ; min(resdf_vero$res)
 
