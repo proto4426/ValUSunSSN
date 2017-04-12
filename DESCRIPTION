@@ -10,6 +10,6 @@ License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
-Suggests: knitr,
-    rmarkdown
+Imports: knitr, ggplot2, gridExtra, rmarkdown, shiny
+Depends: shiny
 VignetteBuilder: knitr

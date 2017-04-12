@@ -1,5 +1,25 @@
+library(ValUSunSSN)
+library(ggplot2)
+library(plotly)
+library(gridExtra)
+library(grid)
+#options(shiny.error = browser)
+
+
+z1 <- cbind(as.data.frame(zssn), Date = data.mat$Date, x = "Filled")
+colnames(z1) <- c( colnames(data.mat2.fin), "Date", "x")
+
+colnames(z1) <- gsub("-", "", colnames(z1))
+
+rownames(y) <- rownames(zssn) <- 1:nrow(y)
+y1 <- cbind(as.data.frame(data.mat2.fin), Date = data.mat$Date, x = "Raw")
+colnames(y1) <- colnames(z1)
+
+
+
+
 # Define server logic required to draw a histogram
-server <- function(input, output) {
+shinyServer(function(input, output) {
 
   output$plot1 <- renderPlot({
     x    <- z1
@@ -37,6 +57,6 @@ server <- function(input, output) {
     }
   })
 
-}
+})
 
-shinyApp(ui = ui, server = server)
+#shinyApp(ui = ui, server = server)

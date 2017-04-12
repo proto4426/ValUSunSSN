@@ -1,13 +1,3 @@
-# EMBEDY embeds a set of time series [x1 x2 ... xm] into an D-dimensional
-# space by taking as state vectors the consecutive sequences: (in Matlab's style)
-# z(k,:) = [x1(k) x1(k+T) ... x1(k+D*T-1) x2(k) x2(k+T) ...  xm(k+D*T-1)]
-# for k=1 to n-D*T+1,  where n is the length of x and T is the embedding delay
-#	x       input matrix (records are columns)              [n,m]
-#	D       embedding dimension                             [1,1]
-#	T       embedding delay (integer>0), default is 1       [1,1]
-#	displ	set displ=0 to prevent size from being displayed
-#           default is with display                         [1,1]
-
 #' @export embedy
 #' @title Embedding time-series
 #' @description
