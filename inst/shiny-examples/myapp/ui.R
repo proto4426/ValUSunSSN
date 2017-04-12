@@ -1,5 +1,7 @@
 library(shiny)
+
 load('/home/piss/PissoortRepo/ValUSunSSN/data/Filled/DataSSN.RData')
+names_stations <- colnames(data.mat2.fin)
 
 
 shinyUI(fluidPage(
@@ -12,10 +14,10 @@ shinyUI(fluidPage(
   # sidebarPanel(
   selectInput("stations",
               "Which Station ? (above)",
-              colnames(z1[,1:52])),
+              names_stations),
   selectInput("stations2",
               "Which second Station ? (below)",
-              colnames(z1[,1:52])),
+              names_stations),
   # width = "150px",
   #)
   checkboxInput("na", "Show only filled values?"),
