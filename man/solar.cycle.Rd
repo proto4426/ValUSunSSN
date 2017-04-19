@@ -4,7 +4,7 @@
 \alias{solar.cycle}
 \title{Solar cycles on ggplots}
 \usage{
-solar.cycle(col = 2, size = 0.3)
+solar.cycle(col = 3, size = 0.3)
 }
 \arguments{
 \item{col}{choose color for the vertical lines}

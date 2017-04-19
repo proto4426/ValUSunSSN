@@ -18,7 +18,7 @@ in number of samples. Set it to 0 if only one single time scale is desired.}
 
 \item{ncomp}{controls the number of significant components.
 It has to be specified for running in automatic mode.
-Default (0=) leads to manual selection during the algorithm}
+Default (0) leads to manual selection during the algorithm}
 
 \item{threshold1}{numeric value controllingthe stop of the iterations after
 the relative energy change is < threshold}

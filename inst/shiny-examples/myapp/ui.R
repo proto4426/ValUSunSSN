@@ -1,10 +1,10 @@
 library(shiny)
 
 #load('/home/piss/PissoortRepo/ValUSunSSN/data/Filled/DataSSN.RData')
-data("data.mat")
+#data("data.mat")
 data("data.mat2.fin")
-data("SSN_filled_all")
-data("silsoSSN")
+#data("SSN_filled_all")
+#data("silsoSSN")
 
 names_stations <- colnames(data.mat2.fin)
 names_stations <- gsub("-", "", names_stations)
@@ -35,7 +35,7 @@ shinyUI(fluidPage(
                         "Silso: same serie everywhere (green)" = "silso",
                         "Filled from Chris" = "chris")),
    checkboxInput("points", "Points ?")
-
+  # numericInput("size", "Size of points", value = 0.2, min = 0, max = 1)
    ),
 
   # Show a plot of the generated distribution
