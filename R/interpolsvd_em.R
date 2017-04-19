@@ -37,13 +37,18 @@
 #' @examples
 #'
 #' # Take this for input, as advised in the test.m file
-#' y <- sqrt(data.mat2.fin+1) # Select randomly here, for testing
+#' y <- sqrt(data.mat2.fin+1) # Selected randomly here, for testing
 #'
 #' options(mc.cores=parallel::detectCores()) # all available cores
 #'
 #' z <- interpolsvd_em(y, nembed = 2, nsmo = 81, ncomp = 4,
 #'                     niter = 30, displ = F)
-#' # 193 sec for the whole dataset (with some stations discarded)
+#' # 393 sec for the whole dataset (with some stations discarded)
+#'
+#' # Then do the inverse transformation to obtain final dataset with filled values
+#' z <- z$y.filled
+#' z_final = z*z - 1
+#' z_final[z_final<0] <- 0
 
 'interpolsvd_em' <-  function( y, nembed = 1, nsmo = 0, ncomp = 0,
                                threshold1 = 1e-5, niter = 30, displ = F){
@@ -61,22 +66,42 @@
   swap <- F # Transpose if too much columns, faster! transpose back in the end
   if ( ncol(y) > 2*nrow(y) ) {   y <- t(y) ;   swap <- T  }
 
-
   ## estimate average and standard deviation and standardise
 
   id.notNA <- apply(y, 2, function(x) which(!is.na(x)))
   obs.notNA <- as.vector(as.numeric(lapply(id.notNA, FUN = length)))
 
+
+  # =========================================================
   # Anwsers if there is sufficient obs per station ?
   bad.obs <- which( obs.notNA <= 1 )
+
   # (From now,) we don't allow stations that have only one obs. Tune it !
   ave_y <- apply(y, 2, mean, na.rm = T )
   sd_y <- apply(y, 2, sd, na.rm = T ) # We remove NA's for this, so far
   y <- sweep(sweep(y, 2, ave_y, "-"), 2, sd_y, "/")
+
   # Control station that are more than 1 obs
-  # And Fill values for station with all NA or with only 1 obs
+  #and Fill values for station with all NA or with only 1 obs
   ave_y[bad.obs] <- mean(ave_y[-bad.obs]) ; sd_y[bad.obs] <- mean(sd_y[-bad.obs])
   # In matlab they replaced by 0 and 1 but it introduced errors.
+  # ============================================================
+  ## Or in Matlab's style :
+  # ave_y = numeric(length = ncol(y))
+  # sd_y = numeric(length = ncol(y))
+  # for (i in 1:ncol(y)){
+  #   w = which(!is.na(y[,i]))
+  #   if (length(w)>1){
+  #     ave_y[i] = mean(y[w,i])
+  #     sd_y[i] = sd(y[w,i])
+  #     y[,i] = (y[,i]-ave_y[i])/sd_y[i]
+  #   }
+  #   else{
+  #     ave_y[i]=0
+  #     sd_y[i]=1
+  #   }
+  # }
+  ## Same answer, but this is slower in R !
 
   ## Perform some tests
 
@@ -116,7 +141,7 @@
   xnew <- x
   for (i in 1:ncol(x)){
     w <- which(!is.na(x[,i]))
-    ave_x[i] <- mean(x[w,i])   # see line 367 it is re-used
+    ave_x[i] <- mean(x[w,i])   # see line 229 it is re-used
     xnew[,i] <- approx(c(0, w, nrow(x)+1), c(0, x[w,i], 0), (1:nrow(x)))$y
     # xnew with NA's replaced by (simple) linear interpolation
 
@@ -143,7 +168,7 @@
       cat(" iterations stopped at", iter.count, "for error =", err[iter.count+1])
       break
     }
-    iter.count = iter.count + 1  
+    iter.count = iter.count + 1
   }
 
     # ask for number of components if necessary
@@ -159,7 +184,7 @@
       if ( any(ncomp2>nE) )  stop(paste(' ncomp must not exceed ', nE))
       else  ncomp2 <- 3
     }
-    
+
     print(paste('using ',ncomp2,' components out of ',nE))
   }
   else {
@@ -167,7 +192,7 @@
     svd <- svd(xnew)
     S <- svd$d  ;   U <- svd$u  ;   V <- svd$v  ;   Ak <- diag(S)
   }
-  
+
   print("main loop starts")
   if (nsmo > 1){
     for (k in 2:ncomp2){  # Now consider the other modes of the SVD until ncomp.
@@ -195,8 +220,9 @@
               err[iter.count+1], "\n")
           break
         }
-        niter = niter - 1
-        cat("time after niter ", niter,  (proc.time() - time)[3], "sec", "\n")
+
+        iter.count = iter.count+1
+        cat("time after niter ", iter.count,  (proc.time() - time)[3], "sec", "\n")
       }
       if (displ == T ) cat('\n')
     }
@@ -240,9 +266,9 @@
   #apply( yf, 2, function(x) x * sd_y + ave_y)
 
   if (swap)  yf <- t(yf)
-  
-  beepr::beep(sound = 8) # Little song to wake you up after this intense simulation ! 
-  
+
+  beepr::beep(sound = 8) # Little song to wake you up after this intense simulation !
+
   cat("Total time elapsed is", (proc.time() - time)[3], "sec")
 
   return(list(y.filled = yf,

@@ -58,7 +58,7 @@
   w <- t(-ns:ns)/ns ;   w <- exp(-3 * w^2)    ;    w <- w/sum(w) #; browser()
 
   a <- rep(1, ns) %*% t(apply(x[1:ns,], 2, mean, na.rm = T));
-  b <- rep(1, ns) %*% t(apply(x[(nrow(x)-(ns-1)):nrow(x), ], 2, mean, na.rm = T) )
+  b <- rep(1, ns) %*% t(apply(x[(nrow(x)-ns):nrow(x), ], 2, mean, na.rm = T) )
   #a <- sweep(x[1:ns, ], 1, ave_y )
   xnew <- rbind(a, x, b) ;  y.smt <- xnew   # Keep same matrix's struct.
   for (i in 1:ncol(x)){  # do the
