@@ -4,7 +4,8 @@
 \alias{theme_piss}
 \title{Homogeneous theme for ggplots}
 \usage{
-theme_piss(size_p = 18, size_c = 14, size_l = 12, theme = theme_bw())
+theme_piss(size_p = 18, size_c = 14, size_l = 12, theme = theme_bw(),
+  ...)
 }
 \arguments{
 \item{size_p}{Size of the plot's title.}
@@ -14,6 +15,9 @@ theme_piss(size_p = 18, size_c = 14, size_l = 12, theme = theme_bw())
 \item{size_l}{Size of the legend's title.}
 
 \item{theme}{ggplot's theme for the plot.}
+
+\item{...}{enables to add other theme's specifications for the plots, see
+\url{http://ggplot2.tidyverse.org/reference/theme.html}}
 }
 \value{
 A personalized ggplot2 theme object to add to every builded plots.

@@ -52,13 +52,18 @@ In the initial data set, gaps are supposed to be filled in with NA !!
 \examples{
 
 # Take this for input, as advised in the test.m file
-y <- sqrt(data.mat2.fin+1) # Select randomly here, for testing
+y <- sqrt(data.mat2.fin+1) # Selected randomly here, for testing
 
 options(mc.cores=parallel::detectCores()) # all available cores
 
 z <- interpolsvd_em(y, nembed = 2, nsmo = 81, ncomp = 4,
                     niter = 30, displ = F)
-# 193 sec for the whole dataset (with some stations discarded)
+# 393 sec for the whole dataset (with some stations discarded)
+
+# Then do the inverse transformation to obtain final dataset with filled values
+z <- z$y.filled
+z_final = z*z - 1
+z_final[z_final<0] <- 0
 }
 \author{
 Antoine Pissoort, \email{antoine.pissoort@student.uclouvain.be}
