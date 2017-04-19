@@ -1,7 +1,10 @@
 library(shiny)
 
 #load('/home/piss/PissoortRepo/ValUSunSSN/data/Filled/DataSSN.RData')
-load('/home/piss/PissoortRepo/ValUSunSSN/data/dataSSN_all.RData')
+data("data.mat")
+data("data.mat2.fin")
+data("SSN_filled_all")
+
 names_stations <- colnames(data.mat2.fin)
 
 
@@ -14,10 +17,10 @@ shinyUI(fluidPage(
   #sidebarLayout(
   # sidebarPanel(
   selectInput("stations",
-              "Which Station ? (above)",
+              "Which Station ? (1st row)",
               names_stations),
   selectInput("stations2",
-              "Which second Station ? (below)",
+              "Which second Station ? (2nd row)",
               names_stations),
   # width = "150px",
   #)
