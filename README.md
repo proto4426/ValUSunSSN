@@ -14,7 +14,7 @@ R package for project Val-U-Sun for the consulting course LSTAT2390 at UCL
 
 After having loaded the package in your environement, you can already run
 
-`runExample()`
+`runExample() # Be sure to have plotly and ggplot2 already installed`
 
 to have a first idea of the filling method for the SSN done with `interposvd_em()`, method coming from 
 
