@@ -170,6 +170,8 @@
 #' @param size_c Size of the axis' title.
 #' @param size_l Size of the legend's title.
 #' @param theme ggplot's theme for the plot.
+#' @param ... enables to add other theme's specifications for the plots, see
+#' \utrl{}
 #'
 #' @return A personalized ggplot2 theme object to add to every builded plots.
 #' @details
@@ -189,18 +191,19 @@
 #'   ggtitle("Filled missing values") +
 #'   theme_piss()
 "theme_piss" <-
-  function(size_p = 18, size_c = 14, size_l = 12, theme = theme_bw()){
-    theme(plot.title = element_text(size = size_p, hjust=0.5,
-                                    colour = "#33666C", face="bold"),
-          axis.title = element_text(face = "bold", size= size_c,
-                                    colour = "#33666C"),
-          legend.position = c(.888, .152),
-          legend.title = element_text(colour="#33666C", size = size_l, face="bold"),
-          legend.background = element_rect(colour = "black"),
-          legend.key = element_rect(fill = "white")) +
-      guides(colour = guide_legend(override.aes = list(size = 2))) +
-      theme
-  }
+  function(size_p = 18, size_c = 14, size_l = 12, theme = theme_bw(), ...){
+
+    text <- function(size,...) element_text(size = size, colour = "#33666C",
+                                            face="bold", ...)
+    theme +
+      theme(plot.title = text(size_p, hjust = 0.5),
+            axis.title = text(size_c),
+            legend.title = text(size_l),
+      ) +
+      theme(legend.background = element_rect(colour = "black"),
+            legend.key = element_rect(fill = "white"), ...
+      )
+}
 
 
 

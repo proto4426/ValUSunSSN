@@ -1,6 +1,7 @@
 library(shiny)
 
-load('/home/piss/PissoortRepo/ValUSunSSN/data/Filled/DataSSN.RData')
+#load('/home/piss/PissoortRepo/ValUSunSSN/data/Filled/DataSSN.RData')
+load('/home/piss/PissoortRepo/ValUSunSSN/data/dataSSN_all.RData')
 names_stations <- colnames(data.mat2.fin)
 
 

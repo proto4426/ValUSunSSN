@@ -4,16 +4,18 @@ library(plotly)
 library(gridExtra)
 library(grid)
 #options(shiny.error = browser)
-load('/home/piss/PissoortRepo/ValUSunSSN/data/Filled/DataSSN.RData')
+load('/home/piss/PissoortRepo/ValUSunSSN/data/dataSSN_all.RData')
 
 
-z1 <- cbind(as.data.frame(zssn), Date = data.mat$Date, x = "Filled")
+# z1 are the filled data
+z1 <- cbind(as.data.frame(z_final), Date = data.mat$Date, x = "Filled")
 colnames(z1) <- c( colnames(data.mat2.fin), "Date", "x")
 
 colnames(z1) <- gsub("-", "", colnames(z1))
 
-rownames(y) <- rownames(zssn) <- 1:nrow(y)
+# y1 are the unfilled data
 y1 <- cbind(as.data.frame(data.mat2.fin), Date = data.mat$Date, x = "Raw")
+rownames(y1) <- rownames(z1) <- 1:nrow(z1)
 colnames(y1) <- colnames(z1)
 
 
@@ -27,14 +29,14 @@ shinyServer(function(input, output) {
     #bins <- seq(min(x), max(x), length.out = input$bins + 1)
     g <- ggplot(x) +
       geom_line(aes_string(x = "Date", y = input$stations)) +
-      theme_piss() + solar.cycle()
+      theme_piss() + solar.cycle() + ggtitle('Filled data ')
     # print(ggplotly(g))
     # plot_ly(data = x, x = ~Date, y = ~input$stations, type = "scattergl") %>%
     #         #color = ~x, colors = c("green", "blue", "red"))
     #   layout(xaxis = xl, yaxis = yl, title = tit, legend = l)
     g2 <- ggplot(x) +
       geom_line(aes_string(x = "Date", y = input$stations2)) +
-      theme_piss() + solar.cycle()
+      theme_piss() + solar.cycle() + ggtitle('Filled data ')
 
     #### Plot Raw data (without filling)
     if (input$na == T) grid.arrange(g, g2, ncol = 2,
