@@ -36,6 +36,12 @@ A list with the following elements:
   \item{\code{errorByComp}}{Numeric vector of length \code{niter} (??)
   containing the errors associated to each iterations( or comp?)}
 }
+But only the first one really affects the outcome. A separation into
+two scales only (with a threshold between 50–100 days) isenough to properly
+capture both short- and long-term evolutions, and embedding dimensions of
+D = 2−5 are usually adequate for reconstructing daily averages. The
+determination of the optimum parameters and validation of the results is
+preferably made by cross-validation.
 }
 \description{
 This main function fills gaps in monovariate or multivariate data
@@ -47,7 +53,14 @@ The method decomposes the data into two time scales, which are processed
 separately and then merged at the end. The cutoff time scale (nsmo) is
 expressed in number of samples. A gaussian filter is used for filtering.
 Monovariate data must be embedded first (nembed>1).
-In the initial data set, gaps are supposed to be filled in with NA !!
+In the initial data set, gaps are supposed to be filled in with NA !!.
+
+The three tuneable (hyper)parameters are :
+\describe{
+\item{ - \code{ncomp }}
+\item{ - \code{nsmo}}
+\item{ - \code{nembed}}
+}
 }
 \examples{
 

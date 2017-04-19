@@ -235,7 +235,7 @@
 #'   guides(colour = guide_legend(override.aes = list(size= 3))) +
 #'   ggtitle("Filled missing values") +
 #'   theme_piss()
-'solar.cycle' <- function( col = 2, size = 0.3) {
+'solar.cycle' <- function( col = 3, size = 0.3) {
   list(
     geom_vline(xintercept = as.numeric(as.Date("1923-05-01")), col = col, size = size),
     geom_vline(xintercept = as.numeric(as.Date("1933-11-01")), col = col, size = size),

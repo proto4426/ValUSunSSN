@@ -17,7 +17,7 @@
 #' @param niter numeric value controlling the  maximum number of iterations
 #' @param  ncomp  controls the number of significant components.
 #' It has to be specified for running in automatic mode.
-#' Default (0=) leads to manual selection during the algorithm
+#' Default (0) leads to manual selection during the algorithm
 #' @param  displ boolean controlling the display of some information in
 #' the console during the algorithm
 #' @details
@@ -25,7 +25,14 @@
 #' separately and then merged at the end. The cutoff time scale (nsmo) is
 #' expressed in number of samples. A gaussian filter is used for filtering.
 #' Monovariate data must be embedded first (nembed>1).
-#' In the initial data set, gaps are supposed to be filled in with NA !!
+#' In the initial data set, gaps are supposed to be filled in with NA !!.
+#'
+#' The three tuneable (hyper)parameters are :
+#' \describe{
+#' \item{ - \code{ncomp }}
+#' \item{ - \code{nsmo}}
+#' \item{ - \code{nembed}}
+#' }
 #' @return A list with the following elements:
 #' \describe{
 #'   \item{\code{y.filled}}{The same dataset as y but with gaps filled}
@@ -33,6 +40,16 @@
 #'   \item{\code{errorByComp}}{Numeric vector of length \code{niter} (??)
 #'   containing the errors associated to each iterations( or comp?)}
 #' }
+#' But only the first one really affects the outcome. A separation into
+#' two scales only (with a threshold between 50–100 days) isenough to properly
+#' capture both short- and long-term evolutions, and embedding dimensions of
+#' D = 2−5 are usually adequate for reconstructing daily averages. The
+#' determination of the optimum parameters and validation of the results is
+#' preferably made by cross-validation.
+#'
+#' @references Dudok de Wit,T. (2011), A method for filling gaps in solar
+#'  irradiance and solar proxy data, Astronomy & Astrophysics, 533
+#'   \url{http://adsabs.harvard.edu/abs/2011A%26A...533A..29D}
 #'
 #' @examples
 #'
@@ -50,7 +67,7 @@
 #' z_final = z*z - 1
 #' z_final[z_final<0] <- 0
 
-'interpolsvd_em' <-  function( y, nembed = 1, nsmo = 0, ncomp = 0,
+'interpolsvd_em' <- function( y, nembed = 1, nsmo = 0, ncomp = 0,
                                threshold1 = 1e-5, niter = 30, displ = F){
   time <- proc.time() # measure time for computational issues
 
@@ -59,6 +76,7 @@
   if (nsmo < 1)
     stop("Please choose other cutoff. If 1 time scale is desired, set nsmo = 0")
 
+  browser()
   Emax <- 95  # max cumulative energy (%) for selecting nr of significant components
 
   # detect shape of input array and transpose in order to have more
@@ -75,17 +93,19 @@
   # =========================================================
   # Anwsers if there is sufficient obs per station ?
   bad.obs <- which( obs.notNA <= 1 )
-
   # (From now,) we don't allow stations that have only one obs. Tune it !
   ave_y <- apply(y, 2, mean, na.rm = T )
   sd_y <- apply(y, 2, sd, na.rm = T ) # We remove NA's for this, so far
+
+  # Standardize the matrix
   y <- sweep(sweep(y, 2, ave_y, "-"), 2, sd_y, "/")
 
-  # Control station that are more than 1 obs
-  #and Fill values for station with all NA or with only 1 obs
+  # Control station that have more than 1 obs
+  # And Fill values for station with all NA or with only 1 obs
   ave_y[bad.obs] <- mean(ave_y[-bad.obs]) ; sd_y[bad.obs] <- mean(sd_y[-bad.obs])
   # In matlab they replaced by 0 and 1 but it introduced errors.
   # ============================================================
+
   ## Or in Matlab's style :
   # ave_y = numeric(length = ncol(y))
   # sd_y = numeric(length = ncol(y))
@@ -102,6 +122,7 @@
   #   }
   # }
   ## Same answer, but this is slower in R !
+
 
   ## Perform some tests
 
