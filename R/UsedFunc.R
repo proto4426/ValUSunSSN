@@ -171,7 +171,7 @@
 #' @param size_l Size of the legend's title.
 #' @param theme ggplot's theme for the plot.
 #' @param ... enables to add other theme's specifications for the plots, see
-#' \utrl{}
+#' \url{http://ggplot2.tidyverse.org/reference/theme.html}
 #'
 #' @return A personalized ggplot2 theme object to add to every builded plots.
 #' @details
