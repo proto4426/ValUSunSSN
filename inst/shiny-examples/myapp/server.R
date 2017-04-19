@@ -11,7 +11,7 @@ data("data.mat")
 data("data.mat2.fin")
 data("SSN_filled_all")
 data("silsoSSN")
-
+data("ssn_splines")
 
 # z1 are the filled data
 z1 <- cbind(as.data.frame(SSN_filled_all),
@@ -27,8 +27,6 @@ rownames(y1) <- rownames(z1) <- 1:nrow(z1)
 colnames(y1) <- colnames(z1)
 
 silsoSSN <- cbind.data.frame(silsoSSN, Date = data.mat$Date)
-
-
 
 
 
@@ -53,6 +51,15 @@ colnames(z_chris) <- c( colnames(data.mat2.fin), "Date")
 ssn_chris <- cbind.data.frame(ssn_chris, Date = z_chris$Date)
 
 
+
+## For splines
+
+splinesdf <- cbind(as.data.frame(ssn_splines), Date = data.mat$Date)
+colnames(splinesdf) <- c( colnames(data.mat2.fin), "Date")
+
+
+
+
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
 
@@ -60,20 +67,20 @@ shinyServer(function(input, output) {
     x    <- z1
     #bins <- seq(min(x), max(x), length.out = input$bins + 1)
     g <- ggplot(x, aes_string(x = "Date", y = input$stations)) +
-       theme_piss() +  ggtitle('Filled data from 1st station')
+      theme_piss() +  ggtitle('Filled  with interpolsvd_em() for 1st station')
     # print(ggplotly(g))
     # plot_ly(data = x, x = ~Date, y = ~input$stations, type = "scattergl") %>%
     #         #color = ~x, colors = c("green", "blue", "red"))
     #   layout(xaxis = xl, yaxis = yl, title = tit, legend = l)
     g2 <- ggplot(x, aes_string(x = "Date", y = input$stations2)) +
-       theme_piss() + ggtitle('Filled data from 2nd station')
+      theme_piss() + ggtitle('Filled with interpolsvd_em() for 2nd station')
 
     if(input$points == T){
       g2 <- g2 + geom_point(size = 0.2)   ;       g <- g + geom_point(size=0.2)
     }
-   else{
-    g2 <- g2 + geom_line()   ;      g <- g + geom_line()
-   }
+    else{
+      g2 <- g2 + geom_line()   ;      g <- g + geom_line()
+    }
 
     g <- g + solar.cycle()    ;    g2 <- g2 + solar.cycle()
 
@@ -103,27 +110,8 @@ shinyServer(function(input, output) {
       grid.arrange(g, gg, g2, gg2, nrow = 2,
                    top = textGrob(expression(" Comparison of SSN + solar cycle "),
                                   gp = gpar(fontsize = 25, font = 3, col ="#33666C")))
-
     }
 
-
-    if(input$na == "silso"){
-      g_silso <- ggplot(silsoSSN, aes_string(x = "Date", y = "SSN")) +
-      theme_piss() +  ggtitle('SSN coming from Silso ')
-
-      if(input$points == T){
-        g_silso <- g_silso + geom_point(col = "green", size=0.2)
-      }
-      else{
-        g_silso <- g_silso + geom_line(col = "green")
-      }
-
-      g_silso <- g_silso + solar.cycle()
-
-    grid.arrange(g, g2, g_silso, g_silso, ncol = 2,
-                 top = textGrob(expression(" Comparison of SSN + solar cycle"),
-                                gp = gpar(fontsize = 25, font = 3, col ="#33666C")))
-    }
 
     if(input$na == "silso"){
       g_silso <- ggplot(silsoSSN, aes_string(x = "Date", y = "SSN")) +
@@ -179,6 +167,35 @@ shinyServer(function(input, output) {
                                   gp = gpar(fontsize = 25, font = 3, col ="#33666C")))
 
     }
+
+    # Comparisons with Splines method
+
+    if(input$na == "splines") {
+      y <- splinesdf
+
+      g_splines <- ggplot(y, aes_string(x = "Date", y = input$stations)) +
+        theme_piss() +  ggtitle('Filled with splines for 1st station')
+      g_splines2 <- ggplot(y, aes_string(x = "Date", y = input$stations2)) +
+        theme_piss() +  ggtitle('Filled with splines for 2nd station')
+
+
+      if(input$points == T){
+        g_splines2 <- g_splines2 + geom_point(col = "blue", size = 0.2)
+        g_splines <- g_splines + geom_point(col = "blue", size=0.2)
+      }
+      else{
+        g_splines2 <- g_splines2 + geom_line(col = "blue")
+        g_splines <- g_splines + geom_line( col = "blue")
+      }
+
+      g_splines2 <- g_splines2 + solar.cycle()
+      g_splines <- g_splines + solar.cycle()
+
+      grid.arrange(g, g_splines, g2, g_splines2, nrow = 2,
+                   top = textGrob(expression(" Comparison of SSN + solar cycle "),
+                                  gp = gpar(fontsize = 25, font = 3, col ="#33666C")))
+    }
+
 
   })
 

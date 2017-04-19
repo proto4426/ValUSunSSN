@@ -31,9 +31,11 @@ shinyUI(fluidPage(
   # checkboxInput("na", "Show only filled values?"),
   column(3, offset = 1,
          selectInput("na", "Compare with ?",
-                     c( "Raw data" = "raw", "Filled only" = "filled",
+                     c( "Raw data" = "raw",
+                        "Filled only" = "filled",
                         "Silso: same serie everywhere (green)" = "silso",
-                        "Filled from Chris" = "chris")),
+                        "Filled from Chris" = "chris",
+                        "Filled with splines" = "splines")),
    checkboxInput("points", "Points ?")
   # numericInput("size", "Size of points", value = 0.2, min = 0, max = 1)
    ),
