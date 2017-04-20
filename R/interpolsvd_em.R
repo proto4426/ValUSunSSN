@@ -76,7 +76,7 @@
   if (nsmo < 1)
     stop("Please choose other cutoff. If 1 time scale is desired, set nsmo = 0")
 
-  browser()
+  #browser()
   Emax <- 95  # max cumulative energy (%) for selecting nr of significant components
 
   # detect shape of input array and transpose in order to have more
