@@ -145,8 +145,7 @@ shinyServer(function(input, output) {
     # 3) Comparisons with Splines method
     
     if(input$na == "splines") {
-      y <- splinesdf
-      
+
       # Have the same coordinates for the compared graphs
       xylim <- coord_cartesian(ylim = c(min(diff_splines[,input$stations],
                                             diff_splines[,input$stations2]),
