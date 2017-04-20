@@ -6,14 +6,14 @@
 
 'runExample' <- function(example) {
   # locate all the shiny app examples that exist
-  validExamples <- list.files(system.file("shiny-examples", package = "mypackage"))
-  
+  validExamples <- list.files(system.file("shiny-examples", package = "ValUSunSSN"))
+
   validExamplesMsg <-
     paste0(
       "Valid examples are: '",
       paste(validExamples, collapse = "', '"),
       "'")
-  
+
   # if an invalid example is given, throw an error
   if (missing(example) || !nzchar(example) ||
       !example %in% validExamples) {
@@ -22,9 +22,9 @@
       validExamplesMsg,
       call. = FALSE)
   }
-  
+
   # find and launch the app
-  appDir <- system.file("shiny-examples", example, package = "mypackage")
+  appDir <- system.file("shiny-examples", example, package = "ValUSunSSN")
   shiny::runApp(appDir, display.mode = "normal")
 }
 
@@ -33,6 +33,6 @@
 #   if (appDir == "") {
 #     stop("Could not find example directory. Try re-installing `ValUSunSSN`.", call. = F)
 #   }
-#   
+#
 #   shiny::runApp(appDir, display.mode = "normal")
 # }
