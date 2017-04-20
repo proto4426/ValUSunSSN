@@ -13,7 +13,7 @@ names_stations <- gsub("-", "", names_stations)
 shinyUI(fluidPage(
 
   # Application title
- titlePanel("Shiny app for Val-U-Sun project!"),
+ titlePanel("Shiny app for Val-U-Sun project! Compare 2 stations"),
 
 
   # Sidebar with a slider input for the number of bins

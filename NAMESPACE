@@ -2,6 +2,7 @@
 
 export(deembedy)
 export(embedy)
+export(interpol_splines)
 export(interpolsvd_em)
 export(rank_reduce)
 export(runExample)
