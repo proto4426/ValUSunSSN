@@ -59,24 +59,31 @@ colnames(splinesdf) <- c( colnames(data.mat2.fin), "Date")
 
 
 
+#### For the differences 
+
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
 
   output$plot1 <- renderPlot({
     x    <- z1
-    #bins <- seq(min(x), max(x), length.out = input$bins + 1)
+
+    # Have the same coordinates for the compared graphs
+    xylim <- coord_cartesian(ylim = c(0, max(x[,input$stations], x[,input$stations2])))
+    
     g <- ggplot(x, aes_string(x = "Date", y = input$stations)) +
-      theme_piss() +  ggtitle('Filled  with interpolsvd_em() for 1st station')
+      theme_piss() +  ggtitle('Filled  with interpolsvd_em() for 1st station') + 
+      xylim
     # print(ggplotly(g))
     # plot_ly(data = x, x = ~Date, y = ~input$stations, type = "scattergl") %>%
     #         #color = ~x, colors = c("green", "blue", "red"))
     #   layout(xaxis = xl, yaxis = yl, title = tit, legend = l)
     g2 <- ggplot(x, aes_string(x = "Date", y = input$stations2)) +
-      theme_piss() + ggtitle('Filled with interpolsvd_em() for 2nd station')
+      theme_piss() + ggtitle('Filled with interpolsvd_em() for 2nd station') + 
+      xylim
 
     if(input$points == T){
-      g2 <- g2 + geom_point(size = 0.2)   ;       g <- g + geom_point(size=0.2)
+      g2 <- g2 + geom_point(size = 0.1)   ;       g <- g + geom_point(size=0.1)
     }
     else{
       g2 <- g2 + geom_line()   ;      g <- g + geom_line()
@@ -90,16 +97,19 @@ shinyServer(function(input, output) {
                                                   gp = gpar(fontsize = 22, font = 3, col ="#33666C")))
     if(input$na == "raw") {
       y <- y1
+      
 
       gg <- ggplot(y, aes_string(x = "Date", y = input$stations)) +
-        theme_piss() +  ggtitle('Raw data of 1st station')
+        theme_piss() +  ggtitle('Raw data of 1st station') +
+        xylim
       gg2 <- ggplot(y, aes_string(x = "Date", y = input$stations2)) +
-        theme_piss() +  ggtitle('Raw data of 2nd station')
+        theme_piss() +  ggtitle('Raw data of 2nd station') + 
+        xylim
 
 
       if(input$points == T){
-        gg2 <- gg2 + geom_point(col = "red", size = 0.2)
-        gg <- gg + geom_point(col = "red", size=0.2)
+        gg2 <- gg2 + geom_point(col = "red", size = 0.1)
+        gg <- gg + geom_point(col = "red", size=0.1)
       }
       else{
         gg2 <- gg2 + geom_line(col = "red")   ;    gg <- gg + geom_line( col = "red")
@@ -115,10 +125,11 @@ shinyServer(function(input, output) {
 
     if(input$na == "silso"){
       g_silso <- ggplot(silsoSSN, aes_string(x = "Date", y = "SSN")) +
-        theme_piss() +  ggtitle('SSN coming from Silso ')
+        theme_piss() +  ggtitle('SSN coming from Silso ') + 
+        xylim
 
       if(input$points == T){
-        g_silso <- g_silso + geom_point(col = "green", size=0.2)
+        g_silso <- g_silso + geom_point(col = "green", size=0.1)
       }
       else{
         g_silso <- g_silso + geom_line(col = "green")
@@ -136,22 +147,32 @@ shinyServer(function(input, output) {
     ## Data from Chris !
 
     if(input$na == "chris") {
+      
+      # Have the same coordinates for the compared graphs
+      xylim <- coord_cartesian(ylim = c(0, max(z_chris[,input$stations],
+                                               ssn_chris[,input$stations2])))
+      
+      
       gz1 <- ggplot(z_chris, aes_string(x = "Date", y = input$stations)) +
-        theme_piss() +  ggtitle('Data from interpol_svd() of 1st station')
+        theme_piss() +  ggtitle('Data from interpol_svd() of 1st station') +
+        xylim
       gchris1 <- ggplot(ssn_chris, aes_string(x = "Date", y = input$stations)) +
-        theme_piss() +  ggtitle('Data from Chris method of 1st station')
+        theme_piss() +  ggtitle('Data from Chris method of 1st station') + 
+        xylim
 
       gz2 <- ggplot(z_chris, aes_string(x = "Date", y = input$stations2)) +
-        theme_piss() +  ggtitle('Data from interpol_svd() of 2nd station')
+        theme_piss() +  ggtitle('Data from interpol_svd() of 2nd station') + 
+        xylim
       gchris2 <- ggplot(ssn_chris, aes_string(x = "Date", y = input$stations2)) +
-        theme_piss() +  ggtitle('Data from Chris method of 2nd station')
+        theme_piss() +  ggtitle('Data from Chris method of 2nd station') + 
+        xylim
 
       if(input$points == T){
-        gz1 <- gz1 + geom_point( size = 0.2)
-        gchris1 <- gchris1 + geom_point(col = "red", size=0.2)
+        gz1 <- gz1 + geom_point( size = 0.1)
+        gchris1 <- gchris1 + geom_point(col = "red", size=0.1)
 
-        gz2 <- gz2 + geom_point( size = 0.2)
-        gchris2 <- gchris2 + geom_point(col = "red", size=0.2)
+        gz2 <- gz2 + geom_point( size = 0.1)
+        gchris2 <- gchris2 + geom_point(col = "red", size=0.1)
       }
       else{
         gz1 <- gz1 + geom_line() ; gchris1 <- gchris1 + geom_line( col = "red")
@@ -165,23 +186,31 @@ shinyServer(function(input, output) {
       grid.arrange(gz1, gchris1, gz2, gchris2, nrow = 2,
                    top = textGrob(expression(" Comparison of SSN + solar cycle "),
                                   gp = gpar(fontsize = 25, font = 3, col ="#33666C")))
-
     }
 
     # Comparisons with Splines method
 
     if(input$na == "splines") {
       y <- splinesdf
+      
+      # Have the same coordinates for the compared graphs
+      xylim <- coord_cartesian(ylim = c(0, max(x[,input$stations],
+                                               x[,input$stations2],
+                                               y[,input$stations],
+                                               y[,input$stations2])))
+      
 
       g_splines <- ggplot(y, aes_string(x = "Date", y = input$stations)) +
-        theme_piss() +  ggtitle('Filled with splines for 1st station')
+        theme_piss() +  ggtitle('Filled with splines for 1st station') + 
+        xylim #+ coord_cartesian(ylim = c(0,100))
       g_splines2 <- ggplot(y, aes_string(x = "Date", y = input$stations2)) +
-        theme_piss() +  ggtitle('Filled with splines for 2nd station')
+        theme_piss() +  ggtitle('Filled with splines for 2nd station') +
+        xylim
 
 
       if(input$points == T){
-        g_splines2 <- g_splines2 + geom_point(col = "blue", size = 0.2)
-        g_splines <- g_splines + geom_point(col = "blue", size=0.2)
+        g_splines2 <- g_splines2 + geom_point(col = "blue", size = 0.1)
+        g_splines <- g_splines + geom_point(col = "blue", size=0.1)
       }
       else{
         g_splines2 <- g_splines2 + geom_line(col = "blue")
