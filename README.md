@@ -1,7 +1,7 @@
 # ValUSunSSN
 R package for project Val-U-Sun for the consulting course LSTAT2390 at UCL
 
-## R code to install the package from GitHub
+## R code to install the package from GitHub (recommended) : 
 1. `devtools::install_github("proto4426/ValUSunSSN")`
 2. `library(ValUSunSSN)`
 
