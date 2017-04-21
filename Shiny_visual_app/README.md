@@ -9,7 +9,7 @@ ValUSunSSN::runExample('residuals' ) # or stations depending on what you want
 
 and the application will appear in Rstudio.
 
-## Or you can also... (but this one is perhaps not updated)
+## Or you can also... (but this one is perhaps not up-to-date)
 
 Many ways to download and run it:
   ```R
