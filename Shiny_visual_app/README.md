@@ -1,15 +1,15 @@
 # How to Use
 
-## The easiest way (recommended)
+## The easiest way (recommended) 
 
 After you have installed and loaded the package, simply run the command
 ```{r}
-ValUSunSSN::runExample()
+ValUSunSSN::runExample('residuals' ) # or stations depending on what you want
 ```
 
 and the application will appear in Rstudio.
 
-## Or you can also...
+## Or you can also... (but this one is perhaps not updated)
 
 Many ways to download and run it:
   ```R
