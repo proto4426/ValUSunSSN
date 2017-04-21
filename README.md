@@ -14,7 +14,9 @@ R package for project Val-U-Sun for the consulting course LSTAT2390 at UCL
 
 After having loaded the package in your environement, you can already run
 
-`runExample() # Be sure to have plotly and ggplot2 already installed`
+`# Be sure to have plotly and ggplot2 already installed`
+`runExample('stations') # Comparison of stations and methods by SSN
+runExample('residuals') # Comparison of stations and methods by residuals `
 
 to have a first idea of the filling method for the SSN done with `interposvd_em()`, method coming from 
 
