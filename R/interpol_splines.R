@@ -211,7 +211,7 @@
         xold <- xnew
         xnew[ind_Na] <- xlp[ind_Na] + xhp[ind_Na]
         xnew <- sweep(xnew, 2, apply(xnew, 2, mean), "-") # average is over stations
-        # and not over time ? check it
+
         e <- xnew[ind_Na] - xold[ind_Na]
         err[iter.count+1] <- sqrt( t(e) %*% e / nNA )   # Same as above : No need to alloc vector
 
@@ -220,11 +220,11 @@
                       format(err,8)))
         }
         if (err[iter.count+1] < threshold1){
-          cat(" iterations stopped at ", niter, "with error =",
+          cat(" iterations stopped at ", iter.count, "with error =",
               err[iter.count+1], "\n")
           break
         }
-        niter = niter - 1
+        iter.count = iter.count+1
         cat("time after niter ", niter,  (proc.time() - time)[3], "sec", "\n")
       }
       if (displ == T ) cat('\n')
@@ -247,7 +247,7 @@
       }
       if (err[iter.count+1] < threshold1) break
       niter = niter - 1
-      cat("time after niter ", niter, "",  (proc.time() - time)[3], "sec", "\n")
+      cat("time after niter ", iter.count, "",  (proc.time() - time)[3], "sec", "\n")
     }
     }
   }
@@ -270,11 +270,12 @@
 
   if (swap)  yf <- t(yf)
 
-  beepr::beep(sound = 8) # Little song to wake you up after this intense simulation !
+  if (displ == T) beepr::beep(sound = 8)
+  # Little song to wake you up after this intense simulation !
 
   cat("Total time elapsed is", (proc.time() - time)[3], "sec")
 
   return(list(y.filled = yf,
               w.distSVD = Ak,
-              errorByComp = err))
+              errorByIt = err))
 }
