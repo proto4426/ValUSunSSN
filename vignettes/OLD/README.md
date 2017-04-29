@@ -1,4 +1,6 @@
 
+**Decompress the .tar.gz and find the .Rmd and .html files inside**
+
 This Rmarkdown file provides a (raw) analysis made with the data taken without the transformation that has been made by Veronique in the Matlab code, i.e. the transformation
 
 $$\sqrt{\boldsymbol{SSN}+1}$$
