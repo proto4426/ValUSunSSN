@@ -12,10 +12,13 @@ data("data.mat2.fin")
 data("SSN_filled_all")
 data("silsoSSN")
 data("ssn_splines")
-
 ## For comparisons with chris :
 data("ssn_chris") # Data filled by Chris's method
 data("z_final60") # Data filled by our method (from 1960)
+
+
+# Handle the station's names for some datasets
+colnames(data.mat2.fin) <- gsub("-", "",  colnames(data.mat2.fin))
 
 ssn_chris <- ssn_chris[,3:61]
 colnames(ssn_chris) <- substring(colnames(ssn_chris), 1, 7)
@@ -140,9 +143,9 @@ shinyServer(function(input, output) {
       }
 
       gchris1 <- gchris1 + solar.cycle() +
-        scale_colour_gradientn(colours = myPalette(10), limits  = c(-20, 20))
+        scale_colour_gradientn(colours = myPalette(10), limits  = y_borders)
       gchris2 <- gchris2 + solar.cycle() +
-        scale_colour_gradientn(colours = myPalette(10), limits = c(-20, 20))
+        scale_colour_gradientn(colours = myPalette(10), limits = y_borders)
 
       grid.arrange(gchris1, gchris2, nrow = 2,
                    top = textGrob(expression(" Comparison of SSN methods + solar cycle "),
