@@ -31,7 +31,7 @@ shinyUI(fluidPage(
                        c("Filled from Chris" = "chris",
                          "Silso" = "silso",
                           "Filled with splines" = "splines")),
-           checkboxInput("points", "Points ?"),
+           checkboxInput("points", "Show Points ?"),
            checkboxInput("percent", "Nomalize by Silso ?")
            # numericInput("size", "Size of points", value = 0.2, min = 0, max = 1)
     ),

@@ -47,7 +47,7 @@ diff_chris_perc <- cbind( chris_mat_perc, Date = diff_chris$Date)
 # normalized by silso
 weights_silso <- silsoSSN[silsoSSN$decdate>1960 & silsoSSN$decdate<2015,]$SSN + 1
 diff_chris_silso <- sweep(diff_chris[,-ncol(diff_chris)], 1,
-                          weights_silso, "/") *1
+                          weights_silso, "/") * 1
 diff_chris_perc <- cbind( diff_chris_silso, Date = diff_chris$Date)
 
 
@@ -60,8 +60,9 @@ colnames(diff_silso) <- colnames(data.mat2.fin)
 diff_silso <- cbind(diff_silso, Date = data.mat$Date)
 
 # Normalized by Silso
+weights_silso <- silsoSSN$SSN + 1
 diff_silso_p <- sweep(diff_silso[,-ncol(diff_silso)], 1,
-                          weights_silso, "/") *1
+                          weights_silso, "/") * 1
 diff_silso_perc <- cbind( diff_silso_p, Date = data.mat$Date)
 
 
@@ -71,8 +72,9 @@ colnames(diff_splines) <- colnames(data.mat2.fin)
 diff_splines <- cbind(diff_splines,  Date = data.mat$Date)
 
 # Normalized by Silso
+weights_silso <- silsoSSN$SSN + 1
 diff_splines_silso <- sweep(diff_splines[,-ncol(diff_splines)], 1,
-                    weights_silso, "/") *1
+                    weights_silso, "/") * 1
 diff_splines_perc <- cbind( diff_splines_silso, Date = diff_splines$Date)
 
 
@@ -123,7 +125,7 @@ shinyServer(function(input, output) {
         gchris2 <- ggplot(diff_chris_perc, aes_string(x = "Date", y = input$stations2,
                                                  col = input$stations2)) +
           theme_piss() +  ggtitle('Residuals with Chris method for 2nd station') +
-          labs(y = paste(input$stations, "(in %)")) + xylim
+          labs(y = paste(input$stations2, "(in %)")) + xylim
          }
 
 
@@ -138,9 +140,9 @@ shinyServer(function(input, output) {
       }
 
       gchris1 <- gchris1 + solar.cycle() +
-        scale_colour_gradientn(colours = myPalette(10), limits  = y_borders)
+        scale_colour_gradientn(colours = myPalette(10), limits  = c(-20, 20))
       gchris2 <- gchris2 + solar.cycle() +
-        scale_colour_gradientn(colours = myPalette(10), limits = y_borders)
+        scale_colour_gradientn(colours = myPalette(10), limits = c(-20, 20))
 
       grid.arrange(gchris1, gchris2, nrow = 2,
                    top = textGrob(expression(" Comparison of SSN methods + solar cycle "),
@@ -165,14 +167,14 @@ shinyServer(function(input, output) {
                                                 col = input$stations)) +
         theme_piss() +  #ggtitle(expression(atop('SSN coming from Silso ',
                                                  #atop(italic("same series everywhere"), ""))))
-        labs(title = 'Residuals compared with the SILSO ',
+        labs(title = 'Residuals compared with the SILSO for 1st station ',
              subtitle = "It is the same series for each stations") +
         theme(plot.subtitle=element_text(size=14, hjust=0.5, face="italic", colour="#33666C")) +
         xylim
       g_silso2 <- ggplot(diff_silso, aes_string(x = "Date", y = input$stations2,
                                                 col = input$stations2)) +
         theme_piss() +
-        labs(title = 'Residuals compared with the SILSO',
+        labs(title = 'Residuals compared with the SILSO for 2nd station',
              subtitle = "It is the same series for each stations") +
         theme(plot.subtitle=element_text(size=14, hjust=0.5, face="italic", colour="#33666C")) +
         xylim
@@ -189,12 +191,14 @@ shinyServer(function(input, output) {
 
         g_silso1 <- ggplot(diff_silso_perc, aes_string(x = "Date", y = input$stations,
                                                       col = input$stations)) +
-          theme_piss() +  ggtitle('Residuals with Chris method for 1st station') +
-          labs(y = paste(input$stations, "(in %)")) +  xylim
+          theme_piss() +  ggtitle('Residuals with SILSO method for 1st station') +
+          labs(y = paste(input$stations, "(in %)"),
+               subtitle = "It is the same series for each stations") +  xylim
         g_silso2 <- ggplot(diff_silso_perc, aes_string(x = "Date", y = input$stations2,
                                                       col = input$stations2)) +
-          theme_piss() +  ggtitle('Residuals with Chris method for 2nd station') +
-          labs(y = paste(input$stations, "(in %)")) + xylim
+          theme_piss() +  ggtitle('Residuals with SILSO method for 2nd station') +
+          labs(y = paste(input$stations2, "(in %)"),
+               subtitle = "It is the same series for each stations") + xylim
       }
 
 
@@ -210,9 +214,9 @@ shinyServer(function(input, output) {
       }
 
       g_silso1 <- g_silso1 + solar.cycle() +
-        scale_colour_gradientn(colours = myPalette(10), limits=c(-100, 100))
+        scale_colour_gradientn(colours = myPalette(10), limits = y_borders)
       g_silso2 <- g_silso2 + solar.cycle() +
-        scale_colour_gradientn(colours = myPalette(10), limits=c(-100, 100))
+        scale_colour_gradientn(colours = myPalette(10), limits = y_borders)
 
 
       grid.arrange(g_silso1, g_silso2, ncol = 1,
@@ -261,7 +265,7 @@ shinyServer(function(input, output) {
         g_splines2 <- ggplot(diff_splines_perc, aes_string(x = "Date", y = input$stations2,
                                                       col = input$stations2)) +
           theme_piss() +  ggtitle('Residuals with Chris method for 2nd station') +
-          labs(y = paste(input$stations, "(in %)")) + xylim
+          labs(y = paste(input$stations2, "(in %)")) + xylim
       }
 
       if(input$points == T){
@@ -274,9 +278,9 @@ shinyServer(function(input, output) {
       }
 
       g_splines2 <- g_splines2 + solar.cycle() +
-        scale_colour_gradientn(colours = myPalette(10), limits=c(-100, 100))
+        scale_colour_gradientn(colours = myPalette(10), limits = y_borders)
       g_splines <- g_splines + solar.cycle() +
-        scale_colour_gradientn(colours = myPalette(10), limits=c(-100, 100))
+        scale_colour_gradientn(colours = myPalette(10), limits = y_borders)
 
       grid.arrange(g_splines, g_splines2, nrow = 2,
                    top = textGrob(expression(" Comparison of SSN methods + solar cycle "),
