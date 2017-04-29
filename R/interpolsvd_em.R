@@ -250,7 +250,7 @@
   }
   else {
     for (k in 1:ncomp2){      iter.count <- 0
-      while (iter.count < niter  ){
+      while (iter.count < niter ){
        xhp <- xnew  ;   xhp <- rank_reduce(xhp, k)
        xold <- xnew   ;    xnew[ind_Na] <- xhp[ind_Na]
 
