@@ -16,9 +16,7 @@ names_stations <- gsub("-", "", names_stations)
 
 ui <- fluidPage(
 
-  # Application title
-  titlePanel("Shiny app for Val-U-Sun project!"),
-
+  titlePanel("Val-U-Sun project! Compare 2 methods by the residuals"),
 
   # Sidebar with a slider input for the number of bins
   fluidRow(
@@ -34,11 +32,12 @@ ui <- fluidPage(
     #)
     # checkboxInput("na", "Show only filled values?"),
     column(3, offset = 1,
-           selectInput("na", "Compare with ?",
-                       c( "Raw data" = "raw", "Filled only" = "filled",
-                          "Silso: same serie everywhere (green)" = "silso",
-                          "Filled from Chris" = "chris")),
-           checkboxInput("points", "Points ?")
+           selectInput("na", "Compare interpolsvd with ?",
+                       c("Filled from Chris" = "chris",
+                         "Silso" = "silso",
+                         "Filled with splines" = "splines")),
+           checkboxInput("points", "Show Points ?"),
+           checkboxInput("percent", "Nomalize by Silso ?")
            # numericInput("size", "Size of points", value = 0.2, min = 0, max = 1)
     ),
 
@@ -55,37 +54,22 @@ library(ggplot2)
 library(plotly)
 library(gridExtra)
 library(grid)
-
+library(RColorBrewer)
+#options(shiny.error = browser)
 
 
 data("data.mat")
 data("data.mat2.fin")
 data("SSN_filled_all")
 data("silsoSSN")
-
-
-# z1 are the filled data
-z1 <- cbind(as.data.frame(SSN_filled_all),
-            Date = data.mat$Date, x = "Filled")
-
-colnames(data.mat2.fin) <- gsub("-", "", colnames(data.mat2.fin))
-colnames(z1) <- c( colnames(data.mat2.fin), "Date", "x")
-
-
-# y1 are the unfilled data
-y1 <- cbind(as.data.frame(data.mat2.fin), Date = data.mat$Date, x = "Raw")
-rownames(y1) <- rownames(z1) <- 1:nrow(z1)
-colnames(y1) <- colnames(z1)
-
-silsoSSN <- cbind.data.frame(silsoSSN, Date = data.mat$Date)
-
-
-
-
-
+data("ssn_splines")
 ## For comparisons with chris :
 data("ssn_chris") # Data filled by Chris's method
 data("z_final60") # Data filled by our method (from 1960)
+
+
+# Handle the station's names for some datasets
+colnames(data.mat2.fin) <- gsub("-", "",  colnames(data.mat2.fin))
 
 ssn_chris <- ssn_chris[,3:61]
 colnames(ssn_chris) <- substring(colnames(ssn_chris), 1, 7)
@@ -97,144 +81,271 @@ colnames(ssn_chris)  <- gsub(".{0}d$", "", colnames(ssn_chris))
 colnames(ssn_chris['wnUC2ol']) <- 'wnUC2old'
 
 
-z_chris <- cbind.data.frame(z_final60,
-                            Date = data.mat[data.mat$decdate>1960 & data.mat$decdate<2015,]$Date)
-colnames(z_chris) <- c( colnames(data.mat2.fin), "Date")
 
-ssn_chris <- cbind.data.frame(ssn_chris, Date = z_chris$Date)
+#### For the differences
+
+# 1) with Chris
+colnames(z_final60) <- colnames(data.mat2.fin)
+diff_chris <- as.data.frame(z_final60 - ssn_chris[,colnames(z_final60) %in% colnames(ssn_chris)])
+# Keep only matched stations (problem with name encoding)
+diff_chris <- cbind(diff_chris,
+                    Date = data.mat[data.mat$decdate>1960 & data.mat$decdate<2015,]$Date)
+
+# In percentages (normalized by the value obtained with our method)
+mean_res <- apply(diff_chris[,-ncol(diff_chris)], 2, mean, na.rm = T)
+#diff_chris_perc <- cbind( (diff_chris[,-ncol(diff_chris)] / z_final60) * 100, Date = diff_chris$Date)
+chris_mat_perc <- sweep(diff_chris[,-ncol(diff_chris)], 2, 100-abs(mean_res), "/") * 1
+#diff_chris_perc <- cbind( (diff_chris[,-ncol(diff_chris)] / mean_res) * 100, Date = diff_chris$Date)
+diff_chris_perc <- cbind( chris_mat_perc, Date = diff_chris$Date)
+
+# normalized by silso
+weights_silso <- silsoSSN[silsoSSN$decdate>1960 & silsoSSN$decdate<2015,]$SSN + 1
+diff_chris_silso <- sweep(diff_chris[,-ncol(diff_chris)], 1,
+                          weights_silso, "/") * 1
+diff_chris_perc <- cbind( diff_chris_silso, Date = diff_chris$Date)
+
+
+
+# 2) With silso
+#diff_silso <- as.data.frame(sweep(SSN_filled_all, 2, silsoSSN$SSN,  "-"))
+#diff_silsoo <- apply(SSN_filled_all, 2, function(x) x - silsoSSN$SSN)
+diff_silso <- as.data.frame(SSN_filled_all - silsoSSN$SSN)
+colnames(diff_silso) <- colnames(data.mat2.fin)
+diff_silso <- cbind(diff_silso, Date = data.mat$Date)
+
+# Normalized by Silso
+weights_silso <- silsoSSN$SSN + 1
+diff_silso_p <- sweep(diff_silso[,-ncol(diff_silso)], 1,
+                      weights_silso, "/") * 1
+diff_silso_perc <- cbind( diff_silso_p, Date = data.mat$Date)
+
+
+# 3) with splines
+diff_splines <- as.data.frame(SSN_filled_all - ssn_splines)
+colnames(diff_splines) <- colnames(data.mat2.fin)
+diff_splines <- cbind(diff_splines,  Date = data.mat$Date)
+
+# Normalized by Silso
+weights_silso <- silsoSSN$SSN + 1
+diff_splines_silso <- sweep(diff_splines[,-ncol(diff_splines)], 1,
+                            weights_silso, "/") * 1
+diff_splines_perc <- cbind( diff_splines_silso, Date = diff_splines$Date)
+
 
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
 
   output$plot1 <- renderPlot({
-    x    <- z1
-    #bins <- seq(min(x), max(x), length.out = input$bins + 1)
-    g <- ggplot(x, aes_string(x = "Date", y = input$stations)) +
-      theme_piss() +  ggtitle('Filled data from 1st station')
-    # print(ggplotly(g))
-    # plot_ly(data = x, x = ~Date, y = ~input$stations, type = "scattergl") %>%
-    #         #color = ~x, colors = c("green", "blue", "red"))
-    #   layout(xaxis = xl, yaxis = yl, title = tit, legend = l)
-    g2 <- ggplot(x, aes_string(x = "Date", y = input$stations2)) +
-      theme_piss() + ggtitle('Filled data from 2nd station')
 
-    if(input$points == T){
-      g2 <- g2 + geom_point(size = 0.2)   ;       g <- g + geom_point(size=0.2)
-    }
-    else{
-      g2 <- g2 + geom_line()   ;      g <- g + geom_line()
-    }
-
-    g <- g + solar.cycle()    ;    g2 <- g2 + solar.cycle()
-
-    #### Plot Raw data (without filling)
-    if (input$na == "filled")
-      grid.arrange(g, g2, ncol = 1,top = textGrob(expression(" Comparison of SSN + solar cycle "),
-                                                  gp = gpar(fontsize = 22, font = 3, col ="#33666C")))
-    if(input$na == "raw") {
-      y <- y1
-
-      gg <- ggplot(y, aes_string(x = "Date", y = input$stations)) +
-        theme_piss() +  ggtitle('Raw data of 1st station')
-      gg2 <- ggplot(y, aes_string(x = "Date", y = input$stations2)) +
-        theme_piss() +  ggtitle('Raw data of 2nd station')
+    myPalette <- colorRampPalette(rev(brewer.pal(4, "Spectral")))
 
 
-      if(input$points == T){
-        gg2 <- gg2 + geom_point(col = "red", size = 0.2)
-        gg <- gg + geom_point(col = "red", size=0.2)
-      }
-      else{
-        gg2 <- gg2 + geom_line(col = "red")   ;    gg <- gg + geom_line( col = "red")
-      }
-
-      gg2 <- gg2 + solar.cycle()    ;    gg <- gg + solar.cycle()
-
-      grid.arrange(g, gg, g2, gg2, nrow = 2,
-                   top = textGrob(expression(" Comparison of SSN + solar cycle "),
-                                  gp = gpar(fontsize = 25, font = 3, col ="#33666C")))
-
-    }
-
-
-    if(input$na == "silso"){
-      g_silso <- ggplot(silsoSSN, aes_string(x = "Date", y = "SSN")) +
-        theme_piss() +  ggtitle('SSN coming from Silso ')
-
-      if(input$points == T){
-        g_silso <- g_silso + geom_point(col = "green", size=0.2)
-      }
-      else{
-        g_silso <- g_silso + geom_line(col = "green")
-      }
-
-      g_silso <- g_silso + solar.cycle()
-
-      grid.arrange(g, g2, g_silso, g_silso, ncol = 2,
-                   top = textGrob(expression(" Comparison of SSN + solar cycle"),
-                                  gp = gpar(fontsize = 25, font = 3, col ="#33666C")))
-    }
-
-    if(input$na == "silso"){
-      g_silso <- ggplot(silsoSSN, aes_string(x = "Date", y = "SSN")) +
-        theme_piss() +  ggtitle('SSN coming from Silso ')
-
-      if(input$points == T){
-        g_silso <- g_silso + geom_point(col = "green", size=0.2)
-      }
-      else{
-        g_silso <- g_silso + geom_line(col = "green")
-      }
-
-      g_silso <- g_silso + solar.cycle()
-
-      grid.arrange(g, g2, g_silso, g_silso, ncol = 2,
-                   top = textGrob(expression(" Comparison of SSN + solar cycle"),
-                                  gp = gpar(fontsize = 25, font = 3, col ="#33666C")))
-    }
-
-
-
-    ## Data from Chris !
+    ## 1) Data from Chris !
 
     if(input$na == "chris") {
-      gz1 <- ggplot(z_chris, aes_string(x = "Date", y = input$stations)) +
-        theme_piss() +  ggtitle('Data from interpol_svd() of 1st station')
-      gchris1 <- ggplot(ssn_chris, aes_string(x = "Date", y = input$stations)) +
-        theme_piss() +  ggtitle('Data from Chris method of 1st station')
 
-      gz2 <- ggplot(z_chris, aes_string(x = "Date", y = input$stations2)) +
-        theme_piss() +  ggtitle('Data from interpol_svd() of 2nd station')
-      gchris2 <- ggplot(ssn_chris, aes_string(x = "Date", y = input$stations2)) +
-        theme_piss() +  ggtitle('Data from Chris method of 2nd station')
+      if(input$percent == F){
+
+        # Have the same coordinates for the compared graphs
+        y_borders <- c(min(diff_chris[,input$stations],
+                           diff_chris[,input$stations2]),
+                       max(diff_chris[,input$stations],
+                           diff_chris[,input$stations2]))
+        xylim <- coord_cartesian(ylim = y_borders)
+
+
+        gchris1 <- ggplot(diff_chris, aes_string(x = "Date", y = input$stations,
+                                                 col = input$stations)) +
+          theme_piss() +  ggtitle('Residuals with Chris method for 1st station') +
+          xylim
+        gchris2 <- ggplot(diff_chris, aes_string(x = "Date", y = input$stations2,
+                                                 col = input$stations2)) +
+          theme_piss() +  ggtitle('Residuals with Chris method for 2nd station') +
+          xylim
+      }
+      ## In percentage
+      else{
+        y_borders <- c(min(diff_chris_perc[,input$stations],
+                           diff_chris_perc[,input$stations2]),
+                       max(diff_chris_perc[,input$stations],
+                           diff_chris_perc[,input$stations2]))
+        xylim <- coord_cartesian(ylim = y_borders)
+
+
+        gchris1 <- ggplot(diff_chris_perc, aes_string(x = "Date", y = input$stations,
+                                                      col = input$stations)) +
+          theme_piss() +  ggtitle('Residuals with Chris method for 1st station') +
+          labs(y = paste(input$stations, "(in %)")) +  xylim
+        gchris2 <- ggplot(diff_chris_perc, aes_string(x = "Date", y = input$stations2,
+                                                      col = input$stations2)) +
+          theme_piss() +  ggtitle('Residuals with Chris method for 2nd station') +
+          labs(y = paste(input$stations2, "(in %)")) + xylim
+      }
+
+
 
       if(input$points == T){
-        gz1 <- gz1 + geom_point( size = 0.2)
-        gchris1 <- gchris1 + geom_point(col = "red", size=0.2)
-
-        gz2 <- gz2 + geom_point( size = 0.2)
-        gchris2 <- gchris2 + geom_point(col = "red", size=0.2)
+        gchris1 <- gchris1 + geom_point( size = 0.1)
+        gchris2 <- gchris2 + geom_point(size=0.1)
       }
       else{
-        gz1 <- gz1 + geom_line() ; gchris1 <- gchris1 + geom_line( col = "red")
-        gz2 <- gz2 + geom_line() ; gchris2 <- gchris2 + geom_line( col = "red")
+        gchris1 <- gchris1 + geom_line( )
+        gchris2 <- gchris2 + geom_line()
       }
 
-      gz1 <- gz1 + solar.cycle()    ;    gchris1 <- gchris1 + solar.cycle()
-      gz2 <- gz2 + solar.cycle()    ;    gchris2 <- gchris2 + solar.cycle()
+      gchris1 <- gchris1 + solar.cycle() +
+        scale_colour_gradientn(colours = myPalette(10), limits  = y_borders)
+      gchris2 <- gchris2 + solar.cycle() +
+        scale_colour_gradientn(colours = myPalette(10), limits = y_borders)
 
-
-      grid.arrange(gz1, gchris1, gz2, gchris2, nrow = 2,
-                   top = textGrob(expression(" Comparison of SSN + solar cycle "),
-                                  gp = gpar(fontsize = 25, font = 3, col ="#33666C")))
-
+      grid.arrange(gchris1, gchris2, nrow = 2,
+                   top = textGrob(expression(" Comparison of SSN methods + solar cycle "),
+                                  gp = gpar(fontsize = 25, font = 3, col ="red")))
     }
+
+
+    # 2) Silso :
+
+    if(input$na == "silso"){
+      if(input$percent == F){
+
+        # Have the same coordinates for the compared graphs
+        y_borders <- c(min(diff_silso[,input$stations],
+                           diff_silso[,input$stations2]),
+                       max(diff_silso[,input$stations],
+                           diff_silso[,input$stations2]))
+        xylim <- coord_cartesian(ylim = y_borders)
+
+
+        g_silso1 <- ggplot(diff_silso, aes_string(x = "Date", y = input$stations,
+                                                  col = input$stations)) +
+          theme_piss() +  #ggtitle(expression(atop('SSN coming from Silso ',
+          #atop(italic("same series everywhere"), ""))))
+          labs(title = 'Residuals compared with the SILSO for 1st station ',
+               subtitle = "It is the same series for each stations") +
+          theme(plot.subtitle=element_text(size=14, hjust=0.5, face="italic", colour="#33666C")) +
+          xylim
+        g_silso2 <- ggplot(diff_silso, aes_string(x = "Date", y = input$stations2,
+                                                  col = input$stations2)) +
+          theme_piss() +
+          labs(title = 'Residuals compared with the SILSO for 2nd station',
+               subtitle = "It is the same series for each stations") +
+          theme(plot.subtitle=element_text(size=14, hjust=0.5, face="italic", colour="#33666C")) +
+          xylim
+
+      }
+      # In percentage
+      else{
+        y_borders <- c(min(diff_silso_perc[,input$stations],
+                           diff_silso_perc[,input$stations2]),
+                       max(diff_silso_perc[,input$stations],
+                           diff_silso_perc[,input$stations2]))
+        xylim <- coord_cartesian(ylim = y_borders)
+
+
+        g_silso1 <- ggplot(diff_silso_perc, aes_string(x = "Date", y = input$stations,
+                                                       col = input$stations)) +
+          theme_piss() +  ggtitle('Residuals with SILSO method for 1st station') +
+          labs(y = paste(input$stations, "(in %)"),
+               subtitle = "It is the same series for each stations") +  xylim
+        g_silso2 <- ggplot(diff_silso_perc, aes_string(x = "Date", y = input$stations2,
+                                                       col = input$stations2)) +
+          theme_piss() +  ggtitle('Residuals with SILSO method for 2nd station') +
+          labs(y = paste(input$stations2, "(in %)"),
+               subtitle = "It is the same series for each stations") + xylim
+      }
+
+
+      if(input$points == T){
+        g_silso1 <- g_silso1 + geom_point( size=0.1)
+        g_silso2 <- g_silso2 + geom_point(size=0.1)
+
+      }
+      else{
+        g_silso1 <- g_silso1 + geom_line()
+        g_silso2 <- g_silso2 + geom_line()
+
+      }
+
+      g_silso1 <- g_silso1 + solar.cycle() +
+        scale_colour_gradientn(colours = myPalette(10), limits = y_borders)
+      g_silso2 <- g_silso2 + solar.cycle() +
+        scale_colour_gradientn(colours = myPalette(10), limits = y_borders)
+
+
+      grid.arrange(g_silso1, g_silso2, ncol = 1,
+                   top = textGrob(expression(" Comparison of SSN methods + solar cycle"),
+                                  gp = gpar(fontsize = 25, font = 3, col ="red")))
+    }
+
+
+    # 3) Comparisons with Splines method
+
+    if(input$na == "splines") {
+
+      if(input$percent == F){
+
+        # Have the same coordinates for the compared graphs
+        y_borders <- c(min(diff_splines[,input$stations],
+                           diff_splines[,input$stations2]),
+                       max(diff_splines[,input$stations],
+                           diff_splines[,input$stations2]))
+        xylim <- coord_cartesian(ylim = y_borders)
+
+
+        g_splines <- ggplot(diff_splines, aes_string(x = "Date", y = input$stations,
+                                                     col = input$stations)) +
+          theme_piss() +  ggtitle('Filled with splines for 1st station') +
+          xylim #+ coord_cartesian(ylim = c(0,100))
+        g_splines2 <- ggplot(diff_splines, aes_string(x = "Date", y = input$stations2,
+                                                      col = input$stations2)) +
+          theme_piss() +  ggtitle('Filled with splines for 2nd station') +
+          xylim
+      }
+
+      # In percentage
+      else{
+        y_borders <- c(min(diff_splines_perc[,input$stations],
+                           diff_splines_perc[,input$stations2]),
+                       max(diff_splines_perc[,input$stations],
+                           diff_splines_perc[,input$stations2]))
+        xylim <- coord_cartesian(ylim = y_borders)
+
+
+        g_splines <- ggplot(diff_splines_perc, aes_string(x = "Date", y = input$stations,
+                                                          col = input$stations)) +
+          theme_piss() +  ggtitle('Residuals with Chris method for 1st station') +
+          labs(y = paste(input$stations, "(in %)")) +  xylim
+        g_splines2 <- ggplot(diff_splines_perc, aes_string(x = "Date", y = input$stations2,
+                                                           col = input$stations2)) +
+          theme_piss() +  ggtitle('Residuals with Chris method for 2nd station') +
+          labs(y = paste(input$stations2, "(in %)")) + xylim
+      }
+
+      if(input$points == T){
+        g_splines2 <- g_splines2 + geom_point(, size = 0.1)
+        g_splines <- g_splines + geom_point( size=0.1)
+      }
+      else{
+        g_splines2 <- g_splines2 + geom_line()
+        g_splines <- g_splines + geom_line( )
+      }
+
+      g_splines2 <- g_splines2 + solar.cycle() +
+        scale_colour_gradientn(colours = myPalette(10), limits = y_borders)
+      g_splines <- g_splines + solar.cycle() +
+        scale_colour_gradientn(colours = myPalette(10), limits = y_borders)
+
+      grid.arrange(g_splines, g_splines2, nrow = 2,
+                   top = textGrob(expression(" Comparison of SSN methods + solar cycle "),
+                                  gp = gpar(fontsize = 25, font = 3, col ="red")))
+    }
+
 
   })
 
 }
-
 shinyApp(ui = ui, server = server)
 
 

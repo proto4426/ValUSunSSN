@@ -67,6 +67,7 @@
                                 threshold1 = 1e-5, niter = 30, displ = F) {
   time <- proc.time() # measure time for computational issues
 
+  #browser()
   if (nembed < 1)
     stop("Please choose nembed >1. If monovariate series, set default =1")
   if (nsmo < 1)
@@ -152,17 +153,20 @@
 
   # first estimate the dominant mode nr 1
   iter.count <- 0
-  err <- numeric(length = niter) # store error assoc. to each # of comp.
+  #err <- numeric(length = niter) # store error assoc. to each # of comp.
   while ( iter.count < niter ){
     xfit <- rank_reduce(xnew, 1)  ;    xold <- xnew
     xnew[ind_Na] <- xfit[ind_Na]  # Now fit the NA's positions with the SVD approx.
     xnew <- sweep(xnew, 2, apply(xnew, 2, mean), "-")
 
     e <- xnew[ind_Na] - xold[ind_Na]
-    err[iter.count+1]  <- sqrt( t(e) %*% e  / nNA) # no need here to create vector for err
+    #err[iter.count+1]  <- sqrt( t(e) %*% e  / nNA)
+    # Only useful for CV : we do not keep here it to speed up the function
+    e <- sqrt( t(e) %*% e / nNA )
 
-    if ( err[iter.count+1]  < threshold1){ # If dominant mode is enough, we stop here
-      cat(" iterations stopped at", iter.count, "for error =", err[iter.count+1])
+
+    if ( e  < threshold1){ # If dominant mode is enough, we stop here
+      cat(" iterations stopped at", iter.count, "for error =", e)
       break
     }
     iter.count = iter.count + 1
@@ -213,40 +217,46 @@
         xnew <- sweep(xnew, 2, apply(xnew, 2, mean), "-") # average is over stations
 
         e <- xnew[ind_Na] - xold[ind_Na]
-        err[iter.count+1] <- sqrt( t(e) %*% e / nNA )   # Same as above : No need to alloc vector
+        #err[iter.count+1] <- sqrt( t(e) %*% e / nNA )   # Same as above : No need to alloc vector
+        e <- sqrt( t(e) %*% e / nNA )
 
         if (displ == T){
           print(paste('ncomp = ', k, '  iteration ', niter,' rel. error = ',
-                      format(err,8)))
+                      format(e, 8)))
         }
-        if (err[iter.count+1] < threshold1){
+        if (e < threshold1){
           cat(" iterations stopped at ", iter.count, "with error =",
-              err[iter.count+1], "\n")
+              e, "\n")
           break
         }
         iter.count = iter.count+1
-        cat("time after niter ", niter,  (proc.time() - time)[3], "sec", "\n")
+        cat("time after niter ", iter.count,  (proc.time() - time)[3], "sec", "\n")
       }
       if (displ == T ) cat('\n')
     }
   }
   else {
-    for (k in 1:ncomp2){      iter.count <- 0
+    for (k in 1:ncomp2){
+      iter.count <- 0
     while (iter.count < niter  ){
-      xhp <- xnew  ;   xhp <- rank_reduce(xhp, k)
-      xold <- xnew   ;    xnew[ind_Na] <- xhp[ind_Na]
+      xhp <- xnew
+      xhp <- rank_reduce(xhp, k)
+      xold <- xnew
+      xnew[ind_Na] <- xhp[ind_Na]
 
       xnew <- sweep(xnew, 2, apply(xnew, 2, mean), "-")
 
       e <- xnew[ind_Na] - xold[ind_Na]
-      err[iter.count+1] <- sqrt(t(e) %*% e/nNa)
+      #err[iter.count+1] <- sqrt(t(e) %*% e/nNa)
+      e <- sqrt( t(e) %*% e / nNA )
+
 
       if (displ == T){
         cat('ncomp =  ', k,' iteration ', iter.count,
-            '  rel. error = ',round(err,8))
+            '  rel. error = ',round(e,8))
       }
-      if (err[iter.count+1] < threshold1) break
-      niter = niter - 1
+      if (e < threshold1) break
+      iter.count = iter.count+1
       cat("time after niter ", iter.count, "",  (proc.time() - time)[3], "sec", "\n")
     }
     }
@@ -276,6 +286,6 @@
   cat("Total time elapsed is", (proc.time() - time)[3], "sec")
 
   return(list(y.filled = yf,
-              w.distSVD = Ak,
-              errorByIt = err))
+              w.distSVD = Ak))
+              #errorByIt = err))
 }
