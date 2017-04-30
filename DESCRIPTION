@@ -2,6 +2,7 @@ Package: ValUSunSSN
 Type: Package
 Title: Val-U-Sun project functions 
 Version: 0.1.0
+Description: Package to store created functions of the Val-U-Sun
 Author: Antoine Pissoort
 Maintainer: Antoine Pissoort <antoine.pissoort@student.uclouvain.be>
 URL: http://github.com/proto4426/ValUSunSSN

@@ -1,6 +1,6 @@
 # ===============================================================
 #' @export interpol_splines
-#' @title interpolated splinesalgorithm to fill missing values
+#' @title interpolated splines algorithm to fill missing values
 #' @author Antoine Pissoort, \email{antoine.pissoort@@student.uclouvain.be}
 #' @description
 #' This main function fills gaps in monovariate or multivariate data
@@ -28,9 +28,9 @@
 #'
 #' The three tuneable (hyper)parameters are :
 #' \describe{
-#' \item{ - \code{ncomp }}
-#' \item{ - \code{nsmo}}
-#' \item{ - \code{nembed}}
+#' \item{\code{ncomp}}
+#' \item{\code{nsmo}}
+#' \item{\code{nembed}}
 #' }
 #' @return A list with the following elements:
 #' \describe{

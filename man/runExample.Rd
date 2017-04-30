@@ -4,8 +4,11 @@
 \alias{runExample}
 \title{Shiny application}
 \usage{
-runExample()
+runExample(example)
+}
+\arguments{
+\item{example}{chooses the example you want. Run runExample() to have the list}
 }
 \examples{
-ValUSunSSN::runExample() # and you should see the app
+ValUSunSSN::runExample('myapp') # and you should see the app
 }

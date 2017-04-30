@@ -2,7 +2,7 @@
 % Please edit documentation in R/interpol_splines.R
 \name{interpol_splines}
 \alias{interpol_splines}
-\title{interpolated splinesalgorithm to fill missing values}
+\title{interpolated splines algorithm to fill missing values}
 \usage{
 interpol_splines(y, nembed = 1, nsmo = 0, ncomp = 0, threshold1 = 1e-05,
   niter = 30, displ = F)
@@ -57,9 +57,9 @@ In the initial data set, gaps are supposed to be filled in with NA !!.
 
 The three tuneable (hyper)parameters are :
 \describe{
-\item{ - \code{ncomp }}
-\item{ - \code{nsmo}}
-\item{ - \code{nembed}}
+\item{\code{ncomp}}
+\item{\code{nsmo}}
+\item{\code{nembed}}
 }
 }
 \examples{

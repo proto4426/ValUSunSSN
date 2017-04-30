@@ -57,9 +57,9 @@ In the initial data set, gaps are supposed to be filled in with NA !!.
 
 The three tuneable (hyper)parameters are :
 \describe{
-\item{ - \code{ncomp }}
-\item{ - \code{nsmo}}
-\item{ - \code{nembed}}
+\item{\code{ncomp}}
+\item{\code{nsmo}}
+\item{\code{nembed}}
 }
 }
 \examples{

@@ -29,9 +29,9 @@
 #'
 #' The three tuneable (hyper)parameters are :
 #' \describe{
-#' \item{ - \code{ncomp }}
-#' \item{ - \code{nsmo}}
-#' \item{ - \code{nembed}}
+#' \item{\code{ncomp}}
+#' \item{\code{nsmo}}
+#' \item{\code{nembed}}
 #' }
 #' @return A list with the following elements:
 #' \describe{
