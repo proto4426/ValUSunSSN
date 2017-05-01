@@ -2,8 +2,12 @@
 R package for project Val-U-Sun for the consulting course LSTAT2390 at UCL
 
 ## R code to install the package from GitHub (recommended) : 
-1. `devtools::install_github("proto4426/ValUSunSSN")`
+1. `devtools::install_github("proto4426/ValUSunSSN",  build_vignettes=T)`
 2. `library(ValUSunSSN)`
+
+Sometimes, you may have to use 
+
+`devtools::install_github("proto4426/PissoortThesis", force=T)`
 
 ## R code to install the package from a local repository:
 1. `install.packages("path-to-ValUSunSSN", repos = NULL, type="source")`
