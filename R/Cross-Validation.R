@@ -4,13 +4,14 @@
 #' @author Antoine Pissoort, \email{antoine.pissoort@@student.uclouvain.be}
 #' @description
 #' This present a "smoother" version of \code{\link{interpolsvd_em}} to apply the
-#' cross-validation.
+#' cross-validation.  We add a parameter "method" to control the method used for
+#' interpolation.
 #' @seealso \code{\link{interpolsvd_em}} for information about the paramters and
 #' the returned values which are the same.
 #' @examples
 #'
 'interpol_CrossVal' <- function( y, nembed = 1, nsmo = 0, ncomp = 0,
-                                threshold1 = 1e-5, niter = 30) {
+                                threshold1 = 1e-5, niter = 30, method = "splines") {
   time <- proc.time() # measure time for computational issues
 
   if (nembed < 1)
@@ -97,10 +98,8 @@
 
   ## first estimate the dominant mode nr 1
   iter.count <- 0
-
   # store error assoc. to each # of comp. and iter
   err <- matrix(NA, nrow = niter, ncol = ncomp)
-
    while ( iter.count < niter ) {
     xfit <- rank_reduce(xnew, 1)  ;    xold <- xnew
     xnew[ind_Na] <- xfit[ind_Na]  # Now fit the NA's positions with the SVD approx.
@@ -132,8 +131,8 @@
       iter.count <- 0
       while (iter.count < niter ){
 
-        xlp <- zoo::na.spline(xnew)
-        #xlp <- smooth_gauss(xnew, nsmo)
+        if(method == "splines")  xlp <- zoo::na.spline(xnew)
+        if(method == "smooth_gauss")  xlp <- smooth_gauss(xnew, nsmo)
 
         xhp <- xnew - xlp     ## Why doing these steps ?? (see above dec of fun)
         xlp <- rank_reduce(xlp, k)  ;     xhp <- rank_reduce(xhp, k)
@@ -222,9 +221,12 @@
 #' \item{\code{nsmo}}
 #' \item{\code{nembed}}
 #' }
-#' @param x
-#' @param comp_max
-#' @param niter
+#' @param x the numeric matrix with days in rows and stations in columns for which we want
+#' to compute the cross-validation based on inteprolsvd_em()
+#' @param comp_max maximum number of component we want to test
+#' @param method controls the method used for interpolation. Thus either "smooth_gauss"
+#' or "splines" is allowed so far.
+#' @param niter the number of iterations of the algorithm.
 #' @param min_keep_frac real between 0 and 1 controlling
 #' @param seed controls the seed of the random index sampling
 #' @details
@@ -245,8 +247,10 @@
 #'
 #' y_obsToNA <- cvFromInterpolsvd(x = y, comp_max = 10,
 #'                               niter = 30, min_keep_frac = 0.2)
-'cvFromInterpolsvd' <- function(x, comp_max = 4, niter = 5,
+'cvFromInterpolsvd' <- function(x, comp_max = 4, nembed = 2, nsmo = 81,
+                                method = "splines", niter = 5,
                                 min_keep_frac = 0.1, seed = 123){
+
   set.seed(seed)   ;    interpol_K <- list() ;   time <- proc.time()
   errorByComp <- CVerrorByComp <- numeric(length = comp_max)
 
@@ -283,8 +287,8 @@
 
   # browser()
   for (j in 1:comp_max) {
-    interpol_K[[j]] <- interpol_CrossVal(x_remove, nembed = 2, nsmo = 81,
-                                         ncomp = j, niter = niter)
+    interpol_K[[j]] <- interpol_CrossVal(x_remove, nembed = nembed, nsmo = nsmo,
+                                         ncomp = j, niter = niter, method = method)
     errorByComp[j] <- interpol_K[[j]]$errorByIt[niter, j]
 
     x_new <- interpol_K[[j]]$y.filled
@@ -306,11 +310,11 @@
   g1 <- ggplot(data.frame("Number of components" = (1:comp_max),
                           "errorByComp" = errorByComp),
                aes(x = Number.of.components, y = errorByComp )) +
-    geom_line() + geom_point()
+    geom_line() + geom_point() + theme_piss()
   g2 <- ggplot(data.frame("Number of components" = (1:comp_max),
                           "CVerrorByComp" = CVerrorByComp),
                aes(x = Number.of.components, y = CVerrorByComp )) +
-    geom_line() + geom_point()
+    geom_line() + geom_point() + theme_piss()
 
   grid.arrange(g1,g2)
 
@@ -321,7 +325,7 @@
   # print( ggplot(df, aes(x = Number.of.components, y = errorByComp, col = CV )) +
   #           geom_line() + geom_point() )
 
-  cat("TOTAL time is", (proc.time() - time)[3], "sec")
+  cat("TOTAL time is ", (proc.time() - time)[3], " sec")
 
   return(list(list_error = interpol_K, errorByComp = errorByComp,
               CVerrorByComp = CVerrorByComp, matrix_notNA = mat_notNA))

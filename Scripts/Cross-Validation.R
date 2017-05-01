@@ -37,7 +37,7 @@ obs.notNA <- as.vector(as.numeric(lapply(id.notNA, FUN = length)))
 
 
 # Take a smaller dataset to test the functions
-str(y_small <- y[data.mat$decdate>1995, c(select_col,  4, 5)])
+str(y_small <- y[data.mat$decdate>1999, c(select_col)])
 
 
 
@@ -54,11 +54,57 @@ z_s <- interpol_splines(y_small, nembed = 2, nsmo = 81,
 
 
 
-y_obsToNA <- cvFromInterpolsvd(x = y, comp_max = 10,
+y_obsToNA <- cvFromInterpolsvd(x = y, comp_max = 10, method = "splines",
                                niter = 30, min_keep_frac = 0.2)
 save(y_obsToNA, file = "cv_all_splines.RData")
 # 500 sec for y_small[7400,13] on smoothgauss
-#
+# around 2h for whole dataset with Splines
 
-y_obsToNA$errorByComp  ;  y_obsToNA$CVerrorByComp
 
+## REPEATED cross-validation to obtain more accurate (less variable) results ?
+
+M <- 5  ;  comp_max = 6  ;   error_cv <- list()
+t <- proc.time()
+for(i in 1:M){
+  rep_cv <- cvFromInterpolsvd(y_small, comp_max = comp_max, nembed = 2, nsmo = 81,
+                              method = "splines",
+                              niter = 5, min_keep_frac = 0.1, seed = i+123)
+  error_cv[[i]] <-  rep_cv$CVerrorByComp
+}
+(proc.time()-t)[3]
+
+# Compute the error mean from the repeated simulations
+mean_cv_error <- colMeans(do.call(rbind, error_cv))
+
+ggplot(data.frame(Number.of.components = 1:comp_max,
+                  CVmeanError = mean_cv_error),
+       aes(x = Number.of.components, y = CVmeanError)) +
+  geom_line() + geom_point() + theme_piss()
+
+
+### Do it in PARALLEL to save some time !
+
+library(foreach)
+library(doParallel)
+
+#setup parallel backend to use many processors
+cores <- detectCores()
+cl <- makeCluster(cores[1]-1) #not to overload the computer
+registerDoParallel(cl)
+
+t <- proc.time()
+cvError_parallel <- foreach(i = 1:M, .combine=cbind,
+                           .packages = c("ValUSunSSN", "ggplot2", "gridExtra")) %dopar% {
+  rep_cv <- cvFromInterpolsvd(y_small, comp_max = comp_max, nembed = 2, nsmo = 81,
+                              method = "splines",
+                              niter = 5, min_keep_frac = 0.1, seed = i+123)
+  rep_cv$CVerrorByComp
+}
+(proc.time()-t)[3]
+mean_cv_error_par <- rowMeans(cvError_parallel)
+stopCluster(cl)
+
+ggplot(data.frame(Number.of.components = 1:comp_max,
+                  CVmeanError = mean_cv_error_par),
+       aes(x = Number.of.components, y = CVmeanError)) +
+  geom_line() + geom_point() + theme_piss()
