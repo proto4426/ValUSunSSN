@@ -76,7 +76,7 @@
   if (nsmo < 1)
     stop("Please choose other cutoff. If 1 time scale is desired, set nsmo = 0")
 
-  #browser()
+  browser()
   Emax <- 95  # max cumulative energy (%) for selecting nr of significant components
 
   # detect shape of input array and transpose in order to have more
@@ -93,7 +93,8 @@
   # =========================================================
   # Anwsers if there is sufficient obs per station ?
   bad.obs <- which( obs.notNA <= 1 )
-  # (From now,) we don't allow stations that have only one obs. Tune it !
+  # (From now,) we don't allow stations that have only one obs. Tune it ?!
+
   ave_y <- apply(y, 2, mean, na.rm = T )
   sd_y <- apply(y, 2, sd, na.rm = T ) # We remove NA's for this, so far
 
@@ -150,11 +151,8 @@
 
   x <- sweep(x, 2, weight, "*")
 
-  # for display, choose the record that contains the largest # of gaps
-  nNA <- sum(is.na(x))
-  ind_gaps <- max(nNA)
 
-  # first iteration: start by filling in gaps by linear interpolation
+  #### first iteration: start by filling in gaps by linear interpolation
   # (Isn't it a bit 'poor' ??)
 
   xi <- matrix(NA, nrow = nrow(x), ncol = ncol(x))
@@ -167,7 +165,12 @@
     # xnew with NA's replaced by (simple) linear interpolation
 
   }
+
+  # for display, choose the record that contains the largest # of gaps
+  nNA <- sum(is.na(x))
+  ind_gaps <- max(nNA)
   print(paste("total NA is : ", nNA))
+
 
   # subtract again the mean over the stations
   xnew <- sweep(xnew, 2, apply(xnew, 2, mean), "-")

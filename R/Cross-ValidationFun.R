@@ -221,14 +221,15 @@
 #' \item{\code{nsmo}}
 #' \item{\code{nembed}}
 #' }
-#' @param x the numeric matrix with days in rows and stations in columns for which we want
+#' @param x the numeric matrix of SSN with days in rows and stations in columns for which we want
 #' to compute the cross-validation based on inteprolsvd_em()
-#' @param comp_max maximum number of component we want to test
-#' @param method controls the method used for interpolation. Thus either "smooth_gauss"
+#' @param comp_max Maximum number of component we want to test
+#' @param method Controls the method used for interpolation. Thus either "smooth_gauss"
 #' or "splines" is allowed so far.
-#' @param niter the number of iterations of the algorithm.
-#' @param min_keep_frac real between 0 and 1 controlling
-#' @param seed controls the seed of the random index sampling
+#' @param niter The number of iterations of the algorithm.
+#' @param min_keep_frac Real between 0 and 1 controlling the % of the
+#' station that has the highest number of NA. This will determine the number of fynthetic gaps
+#' @param seed Controls the seed of the random index sampling pf the synthetic gaps
 #' @details
 #'
 #' @return A grid of 2 ggplot representing the error and the cross-validation
@@ -238,18 +239,18 @@
 #'   \item{\code{y.filled}}{}
 #'   \item{\code{errorByComp}}{}
 #'   \item{\code{CVerrorByComp}}{}
-#'   \item{\code{matrix_notNA}}{}
 #' }
 #' @examples
 #' library(ValUSunSSN)
 #' data("data.mat2.fin")
-#' y <- sqrt(data.mat2.fin+1)
+#' y <- data.mat2.fin
 #'
 #' y_obsToNA <- cvFromInterpolsvd(x = y, comp_max = 10,
 #'                               niter = 30, min_keep_frac = 0.2)
 'cvFromInterpolsvd' <- function(x, comp_max = 4, nembed = 2, nsmo = 81,
                                 method = "splines", niter = 5,
-                                min_keep_frac = 0.1, seed = 123){
+                                min_keep_frac = 0.1, seed = 123, brow = F){
+  if(brow) browser()  # Explore the function
 
   set.seed(seed)   ;    interpol_K <- list() ;   time <- proc.time()
   errorByComp <- CVerrorByComp <- numeric(length = comp_max)
@@ -276,47 +277,52 @@
   # Compute the matrix with true values to compare later with the estimates
   # Then Remove values and finally compute the algorithm with this matrix
   x_true <- matrix(NA, nrow = nrow(mat_notNA_rm), ncol = ncol(x))
-  x_remove <- x
+  x_removed <- x
 
   for(i in 1:ncol(x)){
     x_true[,i] <- x[index_station[[i]], i]
 
     # Place the new NA in the matrix
-    x_remove[rownames(x) %in% mat_notNA_rm[,i] == T, i] <- NA
+    x_removed[rownames(x) %in% mat_notNA_rm[,i] == T, i] <- NA
   }
 
-  # browser()
+  # Compute the Cross-validation Procedure
   for (j in 1:comp_max) {
-    interpol_K[[j]] <- interpol_CrossVal(x_remove, nembed = nembed, nsmo = nsmo,
+    interpol_K[[j]] <- interpol_CrossVal(sqrt(x_removed+1), nembed = nembed, nsmo = nsmo,
                                          ncomp = j, niter = niter, method = method)
     errorByComp[j] <- interpol_K[[j]]$errorByIt[niter, j]
 
     x_new <- interpol_K[[j]]$y.filled
+    x_new <- (x_new * x_new) -1  # Inverse transform
+    x_new[x_new<0] <- 0
+
     rownames(x_new) <- 1:nrow(x_new)
 
-    # Allocate matrix of the same size to replace the estimated values
+    # (Pre-)Allocate matrix of the same size to replace the estimated values
     x_estimate <- x_true
+
+    # Allocate the estimated values in the matrix
     for(i in 1:ncol(x)){
       x_estimate[,i] <- x_new[rownames(x_new) %in% mat_notNA_rm[,i] == T, i]
     }
 
-    N <- nrow(x_estimate) * ncol(x_estimate)
-    CVerrorByComp[j] <- sqrt( N^{-1} * sum((x_estimate - x_true)^2) )
+    N <- nrow(x_estimate) * ncol(x_estimate) # Number of replaced gaps
+    CVerrorByComp[j] <- sqrt( N^-1 * sum((x_estimate - x_true)^2) )
 
     cat("\n", "CV iter number", j, "\n")
   }
 
 
   g1 <- ggplot(data.frame("Number of components" = (1:comp_max),
-                          "errorByComp" = errorByComp),
+                          "RMSE" = errorByComp),
                aes(x = Number.of.components, y = errorByComp )) +
     geom_line() + geom_point() + theme_piss()
   g2 <- ggplot(data.frame("Number of components" = (1:comp_max),
-                          "CVerrorByComp" = CVerrorByComp),
+                          "RMSE CV" = CVerrorByComp),
                aes(x = Number.of.components, y = CVerrorByComp )) +
     geom_line() + geom_point() + theme_piss()
 
-  grid.arrange(g1,g2)
+  grid.arrange(g1,g2, nrow = 1)
 
 
   #  df <- data.frame("Number of components" = rep((1:comp_max), 2),
@@ -328,6 +334,7 @@
   cat("TOTAL time is ", (proc.time() - time)[3], " sec")
 
   return(list(list_error = interpol_K, errorByComp = errorByComp,
-              CVerrorByComp = CVerrorByComp, matrix_notNA = mat_notNA))
+              CVerrorByComp = CVerrorByComp))
   #obs_remove = obs_remove))
 }
+
