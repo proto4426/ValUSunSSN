@@ -1,0 +1,88 @@
+---
+title: "Comparisons R and Matlab method"
+author: "Antoine Pissoort"
+date: "April 7, 2017"
+output:  
+html_document:  
+  css: style.css
+collapsed: yes # Crée un document unique 
+fig_caption: yes # Figures encapsulées ? 
+fig_height: 4.5 # Hauteur par défaut des figures
+fig_width: 6.5 # Largeur par défaut des figure
+theme: lumen  # Style du document
+highlight: github # style de mise en valeur du code
+code_folding: show #  Cache le code  
+number_sections: yes # Ajout table des matières 
+toc: no # Table des matière ?
+toc_depth: 3  # Profondeur table des matière
+toc_float: no # table des matière flottante
+word_document: default
+#bibliography: P2consu.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = F, warning = F)
+```
+
+
+```{r}
+load('/home/piss/PissoortRepo/ValUSunSSN/data/dataSSN.RData')   # Take full dataset
+load('/home/piss/PissoortRepo/ValUSunSSN/data/Filled/DataSSN_OLD.RData')   # Take full dataset
+filled_caro <-read.csv('/home/piss/PissoortRepo/ValUSunSSN/data/filledMATLAB_caro2.csv',header = F)
+
+colnamescsv <-read.csv('/home/piss/PissoortRepo/ValUSunSSN/data/colnames.csv', header = F)
+
+colnames(filled_caro) <- colnamescsv[,2]
+filled_caro <- filled_caro[, colnames(data.mat2.fin)] # reorder the columns
+
+zssn <- z_final
+colnames(zssn) <- colnames(data.mat2.fin)
+# data.mat2.fin is the original dataset (from alldata.csv) with 52 stations
+
+diffwith_caro <- as.matrix(zssn) - as.matrix(filled_caro) # case-by-case differneces between my filled data (zssn) with R and this from matlab
+sum((diffwith_caro)^2, na.rm = T)
+#stats::heatmap(diff_caro, Rowv = F, Colv = F)
+
+## Visualize residuals, averaged over all stations 
+df_res_caro <- cbind.data.frame(diffwith_caro, 
+                                mean_squaredres = apply(diffwith_caro^2, 1, mean, na.rm = T))
+
+sum(is.na(df_res_caro))
+
+library(ValUSunSSN)
+library(RColorBrewer)
+library(ggplot2)
+myPalette <- colorRampPalette(rev(brewer.pal(4, "Spectral")))
+df_res_caro <- cbind(df_res_caro, time = data.mat$Date)
+
+ggplot(df_res_caro, aes(x = time, y = mean_squaredres, col = mean_squaredres)) + geom_point( size = 0.35)  + solar.cycle() + scale_colour_gradientn(colours = myPalette(10), limits=c(0, 1550)) #+ theme_piss()
+
+
+## Check if the cases without NA are the same 
+filled_caro[is.na(data.mat2.fin)] <- NA
+res <- as.data.frame( as.matrix(filled_caro) - as.matrix(data.mat2.fin) )
+sum( res^2, na.rm = T)
+## Lots of differences between the observed values..... ? 
+
+sum(res^2 > 1, na.rm = T)
+
+meanStation_res2 <- apply(res, 2, function(x) sum(x^2, na.rm = T))
+names(meanStation_res2[meanStation_res2 > 1])
+
+plot(res$wnBRm[!is.na(res$wnBRm)])
+psych::describe(res$wnBRm[!is.na(res$wnBRm)])
+sum(res$wnBRm[!is.na(res$wnBRm)]> 1e-3) / length(res$wnBRm)
+
+sum(res['wnBRm']^2, na.rm = T  )
+
+
+sum(is.na(filled_caro)) 
+sum(is.na(data.mat2.fin))
+# Ok
+sum( is.na(filled_caro) == is.na(data.mat2.fin))
+# Why this is different ?
+
+
+
+```
+

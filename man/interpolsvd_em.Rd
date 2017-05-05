@@ -32,9 +32,7 @@ the console during the algorithm}
 A list with the following elements:
 \describe{
   \item{\code{y.filled}}{The same dataset as y but with gaps filled}
-  \item{\code{w.distSVD}}{The distribution of the weights of the SVD}
-  \item{\code{errorByComp}}{Numeric vector of length \code{niter} (??)
-  containing the errors associated to each iterations( or comp?)}
+  \item{\code{w.distSVD}}{The distribution of the weights of the initial SVD}
 }
 But only the first one really affects the outcome. A separation into
 two scales only (with a threshold between 50–100 days) isenough to properly

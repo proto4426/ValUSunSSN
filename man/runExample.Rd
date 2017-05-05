@@ -10,5 +10,8 @@ runExample(example)
 \item{example}{chooses the example you want. Run runExample() to have the list}
 }
 \examples{
-ValUSunSSN::runExample('myapp') # and you should see the app
+library(ValUSunSSN)
+runExample('Name of the App') # and you will see the app you want
+# You juste have to run runExample('') with whatever incorrect name to display the names
+# of the existing apps
 }

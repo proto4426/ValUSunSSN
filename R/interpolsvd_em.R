@@ -36,9 +36,7 @@
 #' @return A list with the following elements:
 #' \describe{
 #'   \item{\code{y.filled}}{The same dataset as y but with gaps filled}
-#'   \item{\code{w.distSVD}}{The distribution of the weights of the SVD}
-#'   \item{\code{errorByComp}}{Numeric vector of length \code{niter} (??)
-#'   containing the errors associated to each iterations( or comp?)}
+#'   \item{\code{w.distSVD}}{The distribution of the weights of the initial SVD}
 #' }
 #' But only the first one really affects the outcome. A separation into
 #' two scales only (with a threshold between 50–100 days) isenough to properly
@@ -76,7 +74,7 @@
   if (nsmo < 1)
     stop("Please choose other cutoff. If 1 time scale is desired, set nsmo = 0")
 
-  browser()
+  #browser()
   Emax <- 95  # max cumulative energy (%) for selecting nr of significant components
 
   # detect shape of input array and transpose in order to have more
@@ -234,7 +232,7 @@
         xold <- xnew
         xnew[ind_Na] <- xlp[ind_Na] + xhp[ind_Na]
         xnew <- sweep(xnew, 2, apply(xnew, 2, mean), "-") # average is over stations
-        # and not over time ? check it
+
         e <- xnew[ind_Na] - xold[ind_Na]
         #err[iter.count+1]  <- sqrt( t(e) %*% e  / nNA)
         # Only useful for CV : we do not keep here it to speed up the function
@@ -282,7 +280,7 @@
     }
    }
   # recompose the data by adding the mean
-  for (i in 1:ncol(x)){ # As nr of columns is ~low, not important to vectorize
+  for (i in 1:ncol(x)){ # As nr of columns is ~low, not important to vectorize here
     w <- which(!is.na(x[,i]), arr.ind = T)
     xnew[,i] <- xnew[,i] / weight[i]
     xnew[,i] <- xnew[,i] - mean(xnew[w,i]) + ave_x[i]

@@ -78,7 +78,9 @@ g2
 
 grid.arrange(g1,g2)
 
-###########" TEST
+
+
+########### TEST
 
 test_cvsplines <- cvFromInterpolsvd_2(x = y_selectedStations, comp_max = 6,
                                       method = "splines", niter = 30, n_folds = 5,
@@ -86,7 +88,9 @@ test_cvsplines <- cvFromInterpolsvd_2(x = y_selectedStations, comp_max = 6,
 
 
 
-## REPEATED cross-validation to obtain more accurate (less variable) results ?
+
+##### REPEATED cross-validation to obtain more accurate (less variable) results ?
+
 
 M <- 5  ;  comp_max = 6  ;   error_cv <- list()
 t <- proc.time()
