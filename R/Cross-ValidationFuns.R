@@ -234,7 +234,7 @@
 #' @title cross-validation from interpolsvd_em algorithm
 #' @author Antoine Pissoort, \email{antoine.pissoort@@student.uclouvain.be}
 #' @description
-#' It aims to compare
+#'
 #'
 #' The three tuneable (hyper)parameters are :
 #' \describe{
@@ -252,12 +252,11 @@
 #' station that has the highest number of NA. This will determine the number of fynthetic gaps
 #' @param seed Controls the seed of the random index sampling pf the synthetic gaps
 #' @details
-#'
+#' see  \code{\link{interpolsvd_em}} for information on the other parameters
 #' @return A grid of 2 ggplot representing the error and the cross-validation
 #' error with respect to the number of components retained from the SVD. And a
 #' list containing the following elements:
 #' \describe{
-#'   \item{\code{y.filled}}{}
 #'   \item{\code{errorByComp}}{}
 #'   \item{\code{CVerrorByComp}}{}
 #' }
@@ -282,7 +281,7 @@
   # Retrieve index of the stations that are not missing
   notNA <- which_notNA(x, matrix = T)
 
-  # Take the minimal number of non-minssing values for the stations
+  # Take the minimal number of non-missing values for the stations
   num_keep_obs <- min(unlist(lapply(notNA,  function(x) length(x))))
 
   # Sample the index of the matrix to remove for the CV
@@ -354,7 +353,7 @@
 
   cat("TOTAL time is ", (proc.time() - time)[3], " sec")
 
-  return(list(list_error = interpol_K, errorByComp = errorByComp,
+  return(list(errorByComp = errorByComp,
               CVerrorByComp = CVerrorByComp))
   #obs_remove = obs_remove))
 }
