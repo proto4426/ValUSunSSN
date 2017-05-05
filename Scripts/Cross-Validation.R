@@ -69,7 +69,7 @@ save(cv_5_splines_err, file = "Data_hidden//cv_5_splines_err.RData")
 
 
 
-M <- 5  ;  comp_max = 6  ;   error_cv <- list()
+M <- 10  ;  comp_max = 6  ;   error_cv <- list()
 t <- proc.time()
 for(i in 1:M){
   rep_cv <- cvFromInterpolsvd(y_small, comp_max = comp_max, nembed = 2, nsmo = 81,
@@ -103,22 +103,23 @@ cvError_parallel <- foreach(i = 1:M, .combine=cbind,
                             .packages = c("ValUSunSSN", "ggplot2", "gridExtra")) %dopar% {
                               rep_cv <- cvFromInterpolsvd(y_selectedStations[9000:33333,], comp_max = comp_max, nembed = 2, nsmo = 81,
                                                           method = "splines",
-                                                          niter = 10, min_keep_frac = 0.1, seed = i+123)
+                                                          niter = 30, min_keep_frac = 0.1, seed = i+123)
                               rep_cv$CVerrorByComp
                             }
 (proc.time()-t)[3]
 mean_cv_error_par <- rowMeans(cvError_parallel)
 stopCluster(cl)
 
-ggplot(data.frame(Number.of.components = 1:comp_max,
+
+ggplot(data.frame(Number.of.components = 1:10,
                   CVmeanError = mean_cv_error_par),
        aes(x = Number.of.components, y = CVmeanError)) +
-  annotate(geom = "text", label = paste("comp. time : \n ", "84 sec."),
-           x = 6,
-           y = 45, col = "#33666C" , size = 3.5, fontface = "italic") +
-  labs(x = "# of Components (to 7)", y = "RMSE CV", title = "5 folds, 10 iter, splines") +
-  geom_line() + geom_point() + theme_piss(plot.title = element_text(colour = "darkred",face = "italic")) +
-  geom_vline(xintercept = which.min(cv5folds_splines$CVerrorByComp), linetype = 2, col = "red")
+  annotate(geom = "text", label = paste("comp. time : \n ", "84 sec.", "\n", "(in parallel)"),
+           x = 7,
+           y = 7.4, col = "#33666C" , size = 4.5, fontface = "italic") +
+  labs(x = "# of Components (to 10)", y = "RMSE CV", title = "CV with 30 iter; splines; 10 repetitions") +
+  geom_line() + geom_point() + theme_piss(plot.title = element_text(,face = "italic")) +
+  geom_vline(xintercept =which.min(mean_cv_error_par), linetype = 2, col = "red")
 
 
 
