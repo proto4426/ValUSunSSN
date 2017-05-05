@@ -202,24 +202,6 @@ g <- ggplot(datag) + geom_line(aes( x = Date, y = ) size = .4) +
   theme_bw()
 
 
-# z1 <- cbind(as.data.frame(z), Date = data.mat$Date )
-# colnames(z1) <- c(colnames(data.mat2.fin), "Date")
-# zz.full <- melt(z1, id.vars = "Date" )
-# dimnames(zz.full)[[2]][2] <- "Station"
-# dimnames(zz.full)[[2]][3] <- "SSN"
-#
-# g <- ggplot(zz.full) + geom_line(aes( x = Date, y = SSN, col = Station), size = .4) +
-#   scale_color_hue(l = 40, c = 200) +
-#   theme_piss()
-# # scale_colour_brewer(name=expression(underline(bold("data: "))),
-# #                     palette = "Set1") +
-# #guides(colour = guide_legend(override.aes = list(size= 2.5)))
-#
-#
-# ggplotly(g)
-
-
-
 
 rownames(y) <- rownames(zssn) <- 1:nrow(y)
 #y1 <- cbind(as.data.frame(data.mat2.fin), Date = data.mat[data.mat$decdate>1981,]$Date, x = "Raw")

@@ -1,4 +1,25 @@
 # ===============================================================
+#' @export which_notNA
+#' @title  Indices retrieval of non-missing values
+#' @author Antoine Pissoort, \email{antoine.pissoort@@student.uclouvain.be}
+#' @description
+#' @param x matrix of interest
+#' @param boolean is T if we keep the matrix structure for indices or not.
+#' @examples
+#'library(ValUSunSSN)
+#' data("data.mat2.fin")
+#' data("data.mat")
+#' #y <- sqrt(data.mat2.fin+1)
+#' y <- data.mat2.fin
+#'
+#' y_nnaF <- which_notNA(y, matrix = T) # Example
+'which_notNA' <- function(x, matrix = F)  {
+  apply(x, 2, function(y) which(!is.na(y), arr.ind = matrix))
+}
+
+
+
+# ===============================================================
 #' @export interpol_CrossVal
 #' @title  interpolsvd_em algorithm for cross-validation
 #' @author Antoine Pissoort, \email{antoine.pissoort@@student.uclouvain.be}
