@@ -2,17 +2,18 @@
 R package for project Val-U-Sun for the consulting course LSTAT2390 at UCL
 
 ## R code to install the package from GitHub (recommended) : 
-```coffe
+```coffee
 devtools::install_github("proto4426/ValUSunSSN",  build_vignettes=T)`
 library(ValUSunSSN)
 ```
 
-Sometimes, you may have to use 
-
-`devtools::install_github("proto4426/PissoortThesis", force=T)`
+In some cases, you may have to use 
+```coffee
+devtools::install_github("proto4426/PissoortThesis", force=T)
+```
 
 ## R code to install the package from a local repository:
-```coffe
+```coffee
 install.packages("path-to-ValUSunSSN", repos = NULL, type="source")
 library(ValUSunSSN)
 ```
@@ -22,7 +23,7 @@ library(ValUSunSSN)
 
 After having loaded the package in your environement, you can already run
 
-```coffe
+```coffee
 # Be sure to have plotly and ggplot2 already installed
 
 runExample('stations') # Comparison of stations and methods by SSN
