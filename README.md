@@ -3,7 +3,7 @@ R package for project Val-U-Sun for the consulting course LSTAT2390 at UCL
 
 ## R code to install the package from GitHub (recommended) : 
 ```coffee
-devtools::install_github("proto4426/ValUSunSSN",  build_vignettes=T)`
+devtools::install_github("proto4426/ValUSunSSN",  build_vignettes=T)
 library(ValUSunSSN)
 ```
 
